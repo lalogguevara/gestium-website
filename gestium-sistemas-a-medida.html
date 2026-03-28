@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestium — Sistemas a Medida</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #0B1C3A;
+    --navy2:  #132847;
+    --gold:   #C9963A;
+    --gold2:  #E8B86D;
+    --white:  #FFFFFF;
+    --off:    #F7F8FC;
+    --off2:   #EEF1F8;
+    --text:   #1A2840;
+    --muted:  #6B7A96;
+    --border: #DDE3EE;
+    --shadow: rgba(11,28,58,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Outfit', sans-serif; background: var(--white); color: var(--text); overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.96); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5rem; height: 72px;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: 1.4rem; color: var(--navy); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .logo::before { content: ''; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; display: inline-block; }
+  .nav-back {
+    display: flex; align-items: center; gap: 0.5rem;
+    color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--navy); }
+  .nav-cta {
+    background: var(--navy); color: var(--white);
+    padding: 0.6rem 1.6rem; border-radius: 4px;
+    font-size: 0.88rem; font-weight: 600; text-decoration: none;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--navy2); }
+
+  /* HERO */
+  .hero {
+    background: var(--navy); padding: 9rem 5rem 6rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero::after {
+    content: ''; position: absolute; top: -150px; right: -150px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(201,150,58,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-left { position: relative; z-index: 2; }
+  .hero-eyebrow {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--gold);
+    display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem;
+  }
+  .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--gold); }
+  .hero h1 {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: clamp(2.5rem, 4vw, 4rem); line-height: 1.1;
+    letter-spacing: -0.02em; color: var(--white); margin-bottom: 0.6rem;
+  }
+  .hero-sub {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.2rem; color: var(--gold2); margin-bottom: 1.5rem;
+  }
+  .hero-desc {
+    font-size: 1rem; font-weight: 300; line-height: 1.75;
+    color: rgba(255,255,255,0.55); max-width: 440px; margin-bottom: 2.5rem;
+    border-left: 2px solid rgba(201,150,58,0.3); padding-left: 1.2rem;
+  }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-gold {
+    background: var(--gold); color: var(--navy); padding: 0.9rem 2rem;
+    border-radius: 4px; font-weight: 600; font-size: 0.9rem;
+    text-decoration: none; transition: background 0.2s, transform 0.2s;
+    display: inline-block;
+  }
+  .btn-gold:hover { background: var(--gold2); transform: translateY(-2px); }
+  .btn-ghost-w {
+    border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.75);
+    padding: 0.9rem 2rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500;
+    text-decoration: none; transition: border-color 0.2s, color 0.2s; display: inline-block;
+  }
+  .btn-ghost-w:hover { border-color: rgba(255,255,255,0.5); color: var(--white); }
+
+  /* Hero right: big icon + highlights */
+  .hero-right { position: relative; z-index: 2; }
+  .hero-icon-big {
+    font-size: 5rem; display: block; text-align: center; margin-bottom: 2rem;
+  }
+  .hero-highlights { display: flex; flex-direction: column; gap: 1px; }
+  .highlight-item {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    padding: 1rem 1.4rem; display: flex; align-items: center; gap: 1rem;
+    transition: background 0.2s;
+  }
+  .highlight-item:hover { background: rgba(255,255,255,0.08); }
+  .hi-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; flex-shrink: 0; }
+  .hi-text { font-size: 0.88rem; font-weight: 500; color: rgba(255,255,255,0.7); }
+
+  /* SECTIONS */
+  .sec { padding: 5rem 5rem; }
+  .sec-inner { max-width: 1100px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--gold); }
+  .sec-title {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.15;
+    color: var(--navy); letter-spacing: -0.02em; margin-bottom: 0.8rem;
+  }
+  .sec-sub { font-size: 1rem; color: var(--muted); line-height: 1.7; max-width: 500px; margin-bottom: 3rem; }
+
+  /* TECH GRID */
+  .tech-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  .tech-card {
+    padding: 1.8rem 1.6rem; border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); transition: background 0.2s;
+  }
+  .tech-card:hover { background: var(--off); }
+  .tech-name { font-weight: 600; font-size: 0.95rem; color: var(--navy); margin-bottom: 0.4rem; }
+  .tech-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.55; }
+
+  /* PROCESS */
+  .proc-list { display: flex; flex-direction: column; gap: 0; }
+  .proc-item {
+    display: grid; grid-template-columns: 80px 1fr;
+    border-bottom: 1px solid var(--border); padding: 2rem 0;
+    transition: background 0.2s;
+  }
+  .proc-item:hover { background: var(--off); padding-left: 1rem; padding-right: 1rem; border-radius: 4px; }
+  .proc-n {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: 2.5rem; color: var(--border); line-height: 1;
+    transition: color 0.2s;
+  }
+  .proc-item:hover .proc-n { color: var(--gold); }
+  .proc-body h4 {
+    font-family: 'Playfair Display', serif; font-weight: 600;
+    font-size: 1.05rem; color: var(--navy); margin-bottom: 0.4rem;
+  }
+  .proc-body p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+  /* DELIVERABLES */
+  .deliv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; list-style: none; }
+  .deliv-item {
+    padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border); font-size: 0.88rem;
+    color: var(--text); display: flex; align-items: center; gap: 0.8rem;
+  }
+  .deliv-item::before { content: '✓'; color: var(--gold); font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+
+  /* FAQ */
+  .faq-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .faq-item { padding: 1.6rem 2rem; border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q { font-weight: 600; font-size: 0.95rem; color: var(--navy); margin-bottom: 0.5rem; }
+  .faq-a { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+  /* CTA SECTION */
+  .cta-sec {
+    background: var(--navy); padding: 5rem;
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: center; gap: 3rem;
+  }
+  .cta-sec h2 {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: clamp(1.8rem, 3vw, 2.8rem); color: var(--white);
+    letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.5rem;
+  }
+  .cta-sec p { font-size: 1rem; color: rgba(255,255,255,0.5); }
+  .cta-btns { display: flex; flex-direction: column; gap: 0.8rem; flex-shrink: 0; min-width: 220px; }
+  .btn-gold-block {
+    display: block; text-align: center; background: var(--gold); color: var(--navy);
+    padding: 0.9rem; border-radius: 4px; font-weight: 700; font-size: 0.88rem;
+    text-decoration: none; transition: background 0.2s;
+  }
+  .btn-gold-block:hover { background: var(--gold2); }
+  .btn-outline-w-block {
+    display: block; text-align: center;
+    border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7);
+    padding: 0.9rem; border-radius: 4px; font-weight: 500; font-size: 0.88rem;
+    text-decoration: none; transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-outline-w-block:hover { border-color: rgba(255,255,255,0.5); color: var(--white); }
+
+  /* FOOTER */
+  footer {
+    background: var(--navy); border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 2rem 5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo-sm {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    font-size: 1.1rem; color: var(--white);
+    display: inline-flex; align-items: center; gap: 6px;
+    text-decoration: none;
+  }
+  .footer-logo-sm::before { content: ''; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; display: inline-block; }
+  footer p { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 1.5rem; }
+    .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 4rem; }
+    .hero-right { display: none; }
+    .sec { padding: 4rem 1.5rem; }
+    .tech-grid { grid-template-columns: 1fr 1fr; }
+    .proc-item { grid-template-columns: 60px 1fr; }
+    .deliv-grid { grid-template-columns: 1fr; }
+    .cta-sec { grid-template-columns: 1fr; padding: 4rem 1.5rem; }
+    footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="gestium-formal.html" class="logo">Gestium</a>
+  <a href="gestium-formal.html" class="nav-back">← Volver al inicio</a>
+  <a href="https://wa.me/521234567890?text=Hola%20Gestium%2C%20me%20interesa%20el%20servicio%20de%20Sistemas%20a%20Medida.%20%C2%BFMe%20pueden%20dar%20m%C3%A1s%20informaci%C3%B3n%3F" target="_blank" class="nav-cta">Contactar por WhatsApp</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Servicio · Gestium</div>
+    <h1>Sistemas a Medida</h1>
+    <div class="hero-sub">Software diseñado exactamente para tu operación</div>
+    <p class="hero-desc">Desarrollamos sistemas digitales personalizados: agendas de citas, expedientes, CRMs, plataformas de gestión y cualquier solución que tu negocio necesite para operar mejor.</p>
+    <div class="hero-btns">
+      <a href="https://wa.me/521234567890?text=Hola%20Gestium%2C%20me%20interesa%20el%20servicio%20de%20Sistemas%20a%20Medida.%20%C2%BFMe%20pueden%20dar%20m%C3%A1s%20informaci%C3%B3n%3F" target="_blank" class="btn-gold">Solicitar información</a>
+      <a href="#proceso" class="btn-ghost-w">Ver cómo trabajamos</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-icon-big">🛠️</div>
+    <div class="hero-highlights">
+      <div class="highlight-item"><span class="hi-dot"></span><span class="hi-text">Sistema web accesible desde cualquier dispositivo</span></div><div class="highlight-item"><span class="hi-dot"></span><span class="hi-text">Roles y permisos por tipo de usuario</span></div><div class="highlight-item"><span class="hi-dot"></span><span class="hi-text">Panel de administración completo</span></div><div class="highlight-item"><span class="hi-dot"></span><span class="hi-text">Reportes exportables (PDF / Excel)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TECNOLOGÍAS -->
+<section class="sec" style="background: var(--white);">
+  <div class="sec-inner">
+    <div class="eyebrow">Tecnologías que usamos</div>
+    <h2 class="sec-title">Stack tecnológico</h2>
+    <p class="sec-sub">Seleccionamos las herramientas más adecuadas según tu proyecto, presupuesto y necesidades a futuro.</p>
+    <div class="tech-grid">
+      
+        <div class="tech-card">
+          <div class="tech-name">React / Next.js</div>
+          <div class="tech-desc">Interfaces web modernas, rápidas y fáciles de usar para tu equipo.</div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-name">Node.js / Python</div>
+          <div class="tech-desc">Backend robusto capaz de manejar grandes volúmenes de datos y lógica de negocio compleja.</div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-name">PostgreSQL / MySQL</div>
+          <div class="tech-desc">Bases de datos relacionales seguras para información crítica de tu negocio.</div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-name">Autenticación y roles</div>
+          <div class="tech-desc">Control de acceso por usuario: administradores, empleados, clientes con permisos distintos.</div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-name">Reportes y dashboards</div>
+          <div class="tech-desc">Visualización de datos en tiempo real para tomar mejores decisiones.</div>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-name">Integraciones API</div>
+          <div class="tech-desc">Conexión con WhatsApp, correo, pagos, facturación electrónica y más.</div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESO -->
+<section class="sec" id="proceso" style="background: var(--off);">
+  <div class="sec-inner">
+    <div class="eyebrow">Metodología</div>
+    <h2 class="sec-title">Cómo es trabajar<br>con nosotros</h2>
+    <p class="sec-sub">Proceso claro y transparente. Siempre sabrás en qué etapa está tu proyecto y qué sigue.</p>
+    <div class="proc-list">
+      
+        <div class="proc-item">
+          <div class="proc-n">01</div>
+          <div class="proc-body">
+            <h4>Mapeo de tu proceso actual</h4>
+            <p>Nos describes cómo funciona hoy tu operación: qué haces manualmente, qué herramientas usas y dónde están los cuellos de botella.</p>
+          </div>
+        </div>
+
+        <div class="proc-item">
+          <div class="proc-n">02</div>
+          <div class="proc-body">
+            <h4>Propuesta técnica detallada</h4>
+            <p>Entregamos un documento con: módulos del sistema, tecnologías, base de datos propuesta, tiempo por fase y costo total.</p>
+          </div>
+        </div>
+
+        <div class="proc-item">
+          <div class="proc-n">03</div>
+          <div class="proc-body">
+            <h4>Prototipo navegable</h4>
+            <p>Antes de programar, puedes navegar un prototipo visual del sistema para validar flujos y pantallas.</p>
+          </div>
+        </div>
+
+        <div class="proc-item">
+          <div class="proc-n">04</div>
+          <div class="proc-body">
+            <h4>Desarrollo por módulos</h4>
+            <p>Construimos módulo por módulo. Cada entrega parcial es funcional y puedes empezar a usarla mientras avanzamos.</p>
+          </div>
+        </div>
+
+        <div class="proc-item">
+          <div class="proc-n">05</div>
+          <div class="proc-body">
+            <h4>Pruebas con tu equipo</h4>
+            <p>Tu equipo prueba el sistema en condiciones reales antes del lanzamiento oficial para detectar cualquier ajuste.</p>
+          </div>
+        </div>
+
+        <div class="proc-item">
+          <div class="proc-n">06</div>
+          <div class="proc-body">
+            <h4>Capacitación y handoff</h4>
+            <p>Capacitamos a tu equipo, entregamos documentación técnica y definimos el plan de soporte y mantenimiento.</p>
+          </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENTREGABLES -->
+<section class="sec" style="background: var(--white);">
+  <div class="sec-inner">
+    <div class="eyebrow">Entregables</div>
+    <h2 class="sec-title">Qué recibes al<br>finalizar el proyecto</h2>
+    <p class="sec-sub">Todo lo que necesitas para operar de forma independiente desde el primer día.</p>
+    <ul class="deliv-grid">
+      <li class="deliv-item">Sistema web accesible desde cualquier dispositivo</li>
+<li class="deliv-item">Roles y permisos por tipo de usuario</li>
+<li class="deliv-item">Panel de administración completo</li>
+<li class="deliv-item">Reportes exportables (PDF / Excel)</li>
+<li class="deliv-item">Copias de seguridad automáticas</li>
+<li class="deliv-item">Documentación técnica del sistema</li>
+<li class="deliv-item">Capacitación para administradores y usuarios</li>
+    </ul>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" style="background: var(--off);">
+  <div class="sec-inner">
+    <div class="eyebrow">Preguntas frecuentes</div>
+    <h2 class="sec-title">Resolvemos tus dudas</h2>
+    <div class="faq-list">
+      
+        <div class="faq-item">
+          <div class="faq-q">¿Cuánto tiempo tarda un sistema a medida?</div>
+          <div class="faq-a">Depende de la complejidad. Un sistema básico (agenda + expedientes): 6–10 semanas. Un CRM completo: 3–5 meses.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">¿Puedo pedir cambios durante el desarrollo?</div>
+          <div class="faq-a">Sí. Trabajamos de forma iterativa. Los cambios menores se absorben; los que cambian el alcance original se cotizan por separado.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">¿Qué pasa si necesito agregar funciones después?</div>
+          <div class="faq-a">El sistema se construye pensando en crecer. Agregar nuevos módulos o funciones siempre es posible con una cotización adicional.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">¿Qué incluye el mantenimiento mensual?</div>
+          <div class="faq-a">El pago mensual cubre el mantenimiento continuo de tu proyecto: actualizaciones, monitoreo y corrección de errores o fallas que puedan surgir. Si algo deja de funcionar, entramos a resolverlo sin costo adicional. Tú te enfocas en tu negocio, nosotros nos encargamos de que todo siempre esté operando correctamente.</div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-sec">
+  <div>
+    <h2>¿Listo para empezar<br>tu proyecto?</h2>
+    <p>Primera consulta gratuita y sin compromiso. Cuéntanos tu idea.</p>
+  </div>
+  <div class="cta-btns">
+    <a href="https://wa.me/521234567890?text=Hola%20Gestium%2C%20me%20interesa%20el%20servicio%20de%20Sistemas%20a%20Medida.%20%C2%BFMe%20pueden%20dar%20m%C3%A1s%20informaci%C3%B3n%3F" target="_blank" class="btn-gold-block">Escribir por WhatsApp</a>
+    <a href="/cdn-cgi/l/email-protection#3a5255565b7a5d5f494e534f57145742" class="btn-outline-w-block">Enviar un correo</a>
+  </div>
+</div>
+
+<footer>
+  <a href="gestium-formal.html" class="footer-logo-sm">Gestium</a>
+  <p>© 2025 Gestium. Todos los derechos rese
