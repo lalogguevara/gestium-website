@@ -239,7 +239,13 @@ tr:hover td { background: var(--off); }
         <div class="sec-card-header">
           <div class="sec-card-title">Todas las Citas</div>
           <div class="filters">
-            <input type="date" class="filter-input" id="filter-date" onchange="renderCitasTable()">
+            <select class="filter-input" id="filter-fecha-tipo" onchange="onFechaTipoChange()">
+              <option value="hoy">Hoy</option>
+              <option value="futuras">Desde hoy en adelante</option>
+              <option value="todas">Todas</option>
+              <option value="fecha">Fecha específica</option>
+            </select>
+            <input type="date" class="filter-input" id="filter-date" onchange="renderCitasTable()" style="display:none;">
             <select class="filter-input" id="filter-estado" onchange="renderCitasTable()">
               <option value="">Todos los estados</option>
               <option value="Pendiente">Pendiente</option>
@@ -429,8 +435,6 @@ const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto
 const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const DAYS_FULL = ['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
 
-function getConfig() { return JSON.parse(localStorage.getItem('gestium_config')||'{"start":"09:00","end":"19:00","cancel":24,"duration":60,"days":[1,2,3,4,5,6]}'); }
-function saveConfigData(c) { localStorage.setItem('gestium_config', JSON.stringify(c)); }
 function getBlocks() { return JSON.parse(localStorage.getItem('gestium_blocks')||'[]'); }
 function saveBlocks(b) { localStorage.setItem('gestium_blocks', JSON.stringify(b)); }
 function getRecurrentes() { return JSON.parse(localStorage.getItem('gestium_rec')||'[]'); }
@@ -523,14 +527,25 @@ async function renderKPIs() {
     <div class="kpi-card"><div class="kpi-num orange">${pend}</div><div class="kpi-lbl">Pendientes</div></div>`;
 }
 
+function onFechaTipoChange(){
+  const tipo=document.getElementById('filter-fecha-tipo').value;
+  document.getElementById('filter-date').style.display=tipo==='fecha'?'inline-block':'none';
+  renderCitasTable();
+}
+
 // ── CITAS TABLE desde Supabase ──
 async function renderCitasTable() {
   const tbody = document.getElementById('citas-tbody');
   tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Cargando...</td></tr>`;
-  let query = sb.from('citas').select('*');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const tipo = document.getElementById('filter-fecha-tipo').value;
   const filterDate = document.getElementById('filter-date').value;
   const filterState = document.getElementById('filter-estado').value;
-  if(filterDate) query = query.eq('fecha', filterDate);
+
+  let query = sb.from('citas').select('*');
+  if(tipo==='hoy') query = query.eq('fecha', todayStr);
+  else if(tipo==='futuras') query = query.gte('fecha', todayStr);
+  else if(tipo==='fecha' && filterDate) query = query.eq('fecha', filterDate);
   if(filterState) query = query.eq('estado', filterState);
   const {data:appts} = await query.order('fecha').order('hora');
   if(!appts||!appts.length){tbody.innerHTML=`<tr><td colspan="7" class="empty-state">No hay citas con estos filtros</td></tr>`;return;}
@@ -645,52 +660,80 @@ async function renderWeekCalendar() {
   document.getElementById('cal-admin-container').innerHTML = html;
 }
 
-// ── CONFIG (localStorage) ──
+// ── CONFIG en Supabase ──
 const DAYS_CONFIG = [{d:1,l:'LUN'},{d:2,l:'MAR'},{d:3,l:'MIÉ'},{d:4,l:'JUE'},{d:5,l:'VIE'},{d:6,l:'SÁB'},{d:0,l:'DOM'}];
-function renderConfigForm() {
-  const cfg = getConfig();
-  document.getElementById('cfg-start').value = cfg.start;
-  document.getElementById('cfg-end').value = cfg.end;
-  document.getElementById('cfg-cancel').value = cfg.cancel;
-  document.getElementById('cfg-duration').value = cfg.duration||60;
-  const dg = document.getElementById('days-grid');
-  dg.innerHTML = DAYS_CONFIG.map(({d,l})=>`<div class="day-toggle${cfg.days.includes(d)?' active':''}" onclick="toggleDay(${d},this)">${l}</div>`).join('');
+async function renderConfigForm() {
+  const {data:cfg} = await sb.from('config').select('*').eq('id',1).single();
+  if(cfg){
+    document.getElementById('cfg-start').value = cfg.hora_inicio ? cfg.hora_inicio.substring(0,5) : '09:00';
+    document.getElementById('cfg-end').value = cfg.hora_fin ? cfg.hora_fin.substring(0,5) : '18:00';
+    document.getElementById('cfg-cancel').value = cfg.cancelacion_horas || 24;
+    document.getElementById('cfg-duration').value = cfg.duracion || 30;
+    const dias = cfg.dias_laborales || [1,2,3,4,5,6];
+    const dg = document.getElementById('days-grid');
+    dg.innerHTML = DAYS_CONFIG.map(({d,l})=>`<div class="day-toggle${dias.includes(d)?' active':''}" onclick="toggleDay(${d},this)">${l}</div>`).join('');
+  }
+  document.getElementById('config-today').textContent = new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   renderSingleSlots();
 }
 function toggleDay(d, el) { el.classList.toggle('active'); }
-function saveConfig() {
-  const cfg = getConfig();
-  cfg.start = document.getElementById('cfg-start').value;
-  cfg.end = document.getElementById('cfg-end').value;
-  cfg.cancel = parseInt(document.getElementById('cfg-cancel').value);
-  cfg.duration = parseInt(document.getElementById('cfg-duration').value);
-  saveConfigData(cfg);
+async function saveConfig() {
+  const hora_inicio = document.getElementById('cfg-start').value;
+  const hora_fin = document.getElementById('cfg-end').value;
+  const cancelacion_horas = parseInt(document.getElementById('cfg-cancel').value);
+  const duracion = parseInt(document.getElementById('cfg-duration').value);
+  const {error} = await sb.from('config').update({hora_inicio, hora_fin, cancelacion_horas, duracion}).eq('id',1);
+  if(error){alert('Error al guardar');return;}
   alert('✅ Configuración guardada');
 }
-function saveDays() {
-  const cfg = getConfig();
-  cfg.days = DAYS_CONFIG.filter(({d})=>document.querySelector(`.day-toggle[onclick*="${d}"]`)?.classList.contains('active')).map(({d})=>d);
-  saveConfigData(cfg);
+async function saveDays() {
+  const dias_laborales = DAYS_CONFIG.filter(({d})=>document.querySelector(`.day-toggle[onclick*="toggleDay(${d},"]`)?.classList.contains('active')).map(({d})=>d);
+  const {error} = await sb.from('config').update({dias_laborales}).eq('id',1);
+  if(error){alert('Error al guardar');return;}
   alert('✅ Días guardados');
 }
-function renderSingleSlots() {
-  const slots = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
-  const saved = JSON.parse(localStorage.getItem('gestium_single')||'{}');
+
+// ── HORARIOS CON 1 PACIENTE en Supabase ──
+async function renderSingleSlots() {
   const dateInput = document.getElementById('single-date');
   if(!dateInput) return;
-  document.getElementById('single-date').oninput = renderSingleSlots;
+  dateInput.oninput = renderSingleSlots;
   const date = dateInput.value;
-  const singleDates = saved[date]||[];
-  document.getElementById('single-slots').innerHTML = slots.map(s=>`<div class="ts-config${singleDates.includes(s)?' single':''}" onclick="toggleSingleSlot('${s}',this)">${s}</div>`).join('');
+  if(!date){document.getElementById('single-slots').innerHTML='<div style="color:var(--muted);font-size:0.82rem;">Selecciona una fecha</div>';return;}
+
+  // Leer config para generar slots según horario configurado
+  const {data:cfg} = await sb.from('config').select('*').eq('id',1).single();
+  const inicio = cfg?.hora_inicio?.substring(0,5)||'09:00';
+  const fin = cfg?.hora_fin?.substring(0,5)||'18:00';
+  const dur = cfg?.duracion||30;
+  const slots = generateSlots(inicio, fin, dur);
+
+  const {data:simpleData} = await sb.from('horarios_simple').select('hora').eq('fecha',date);
+  const horasSimple = new Set((simpleData||[]).map(r=>r.hora.substring(0,5)));
+  document.getElementById('single-slots').innerHTML = slots.map(s=>`<div class="ts-config${horasSimple.has(s)?' single':''}" onclick="toggleSingleSlot('${s}',this)">${s}</div>`).join('');
 }
 function toggleSingleSlot(s, el) { el.classList.toggle('single'); }
-function saveSingleSlots() {
+async function saveSingleSlots() {
   const date = document.getElementById('single-date').value;
   if(!date){alert('Selecciona una fecha');return;}
-  const saved = JSON.parse(localStorage.getItem('gestium_single')||'{}');
-  saved[date] = [...document.querySelectorAll('.ts-config.single')].map(el=>el.textContent);
-  localStorage.setItem('gestium_single',JSON.stringify(saved));
-  alert('✅ Horarios guardados');
+  // Borrar los existentes para esa fecha
+  await sb.from('horarios_simple').delete().eq('fecha',date);
+  // Insertar los seleccionados
+  const selected = [...document.querySelectorAll('.ts-config.single')].map(el=>({fecha:date, hora:el.textContent}));
+  if(selected.length>0) await sb.from('horarios_simple').insert(selected);
+  alert('✅ Horarios con 1 paciente guardados');
+}
+
+// Función compartida con reservas para generar slots
+function generateSlots(inicio, fin, duracion){
+  const slots=[];
+  let [h,m]=inicio.split(':').map(Number);
+  const [fh,fm]=fin.split(':').map(Number);
+  while(h*60+m < fh*60+fm){
+    slots.push((h<10?'0':'')+h+':'+(m===0?'00':m));
+    m+=duracion; if(m>=60){h+=Math.floor(m/60);m=m%60;}
+  }
+  return slots;
 }
 
 // ── BLOQUEAR FECHAS ──
@@ -829,7 +872,7 @@ function removeRec(id) {
 }
 
 // ── INIT ──
-document.getElementById('filter-date').value = new Date().toLocaleDateString('en-CA');
+// El filtro por defecto es "Hoy", no necesita setear fecha manual
 </script>
 </body>
 </html>
