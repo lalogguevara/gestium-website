@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestium — Sistema de Reservas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B1C3A;--navy2:#132847;--gold:#C9963A;--gold2:#E8B86D;--white:#FFFFFF;--off:#F7F8FC;--off2:#EEF1F8;--text:#1A2840;--muted:#6B7A96;--border:#DDE3EE;--green:#1A7A3C;--green-bg:#EEF9F0;--red:#A32D2D;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--text);overflow-x:hidden;}
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 4rem;height:68px;}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:700;font-size:1.3rem;color:var(--navy);display:flex;align-items:center;gap:6px;text-decoration:none;}
+.nav-logo::before{content:'';width:8px;height:8px;background:var(--gold);border-radius:50%;}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.88rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:var(--navy);}
+.nav-admin{background:var(--navy);color:var(--white);padding:0.55rem 1.4rem;border-radius:4px;font-size:0.85rem;font-weight:600;text-decoration:none;transition:background 0.2s;}
+.nav-admin:hover{background:var(--navy2);}
+.hero{background:linear-gradient(160deg,var(--off) 0%,var(--off2) 100%);border-bottom:1px solid var(--border);padding:5rem 4rem 4rem;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(201,150,58,0.08) 0%,transparent 70%);pointer-events:none;}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.3);color:var(--gold);padding:0.3rem 0.9rem;border-radius:100px;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem;position:relative;z-index:2;}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero h1{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(2.4rem,5vw,4rem);line-height:1.1;letter-spacing:-0.02em;color:var(--navy);margin-bottom:1rem;position:relative;z-index:2;}
+.hero h1 em{font-style:italic;color:var(--gold);}
+.hero-sub{font-size:1rem;font-weight:300;color:var(--muted);line-height:1.7;max-width:520px;margin:0 auto;position:relative;z-index:2;}
+.booking-section{background:var(--off);padding:3rem 2rem 5rem;}
+.booking-wrap{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:1fr 340px;gap:2rem;align-items:start;}
+.steps-bar{display:grid;grid-template-columns:1fr 1fr 1fr;margin-bottom:1.5rem;border-radius:6px;overflow:hidden;border:1px solid var(--border);background:var(--white);}
+.step-tab{padding:0.9rem 1rem;text-align:center;font-size:0.83rem;font-weight:500;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all 0.2s;border-right:1px solid var(--border);}
+.step-tab:last-child{border-right:none;}
+.step-tab.active{background:var(--navy);color:var(--white);}
+.step-tab.done{background:var(--gold);color:var(--navy);font-weight:600;}
+.step-num{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;}
+.step-tab.active .step-num{border-color:var(--gold);color:var(--gold);}
+.step-tab.done .step-num{background:var(--navy);border-color:var(--navy);color:var(--white);}
+.form-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:2.5rem;}
+.form-card h2{font-family:'Playfair Display',serif;font-weight:600;font-size:1.4rem;color:var(--navy);margin-bottom:0.3rem;}
+.form-card>p{color:var(--muted);font-size:0.87rem;margin-bottom:2rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.form-group{display:flex;flex-direction:column;gap:0.35rem;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.form-group input,.form-group select,.form-group textarea{border:1px solid var(--border);border-radius:4px;padding:0.75rem 1rem;font-family:'Outfit',sans-serif;font-size:0.9rem;color:var(--text);background:var(--white);transition:border-color 0.2s;outline:none;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold);}
+.form-group textarea{resize:vertical;min-height:90px;}
+.phone-wrap{display:flex;gap:0.5rem;}
+.phone-wrap select{width:110px;flex-shrink:0;}
+.phone-wrap input{flex:1;}
+.btn-continue{width:100%;background:var(--navy);color:var(--white);border:none;border-radius:4px;padding:0.95rem;font-family:'Outfit',sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;transition:background 0.2s;margin-top:1.5rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;}
+.btn-continue:hover{background:var(--navy2);}
+.btn-back{width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:0.85rem;font-family:'Outfit',sans-serif;font-size:0.88rem;cursor:pointer;transition:all 0.2s;margin-top:0.5rem;}
+.btn-back:hover{border-color:var(--navy);color:var(--navy);}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;}
+.cal-month-label{font-family:'Playfair Display',serif;font-weight:600;font-size:0.98rem;color:var(--navy);}
+.cal-nav-btn{background:none;border:1px solid var(--border);border-radius:3px;padding:0.35rem 0.65rem;font-size:0.85rem;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.cal-nav-btn:hover{border-color:var(--navy);color:var(--navy);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1.5rem;}
+.cal-day-name{text-align:center;font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:0.06em;padding:0.3rem 0;}
+.cal-day{text-align:center;padding:0.5rem;border-radius:3px;font-size:0.84rem;cursor:pointer;transition:all 0.12s;border:1px solid transparent;}
+.cal-day:hover:not(.disabled):not(.empty){background:var(--off2);border-color:var(--gold);}
+.cal-day.selected{background:var(--navy);color:var(--white);}
+.cal-day.today{font-weight:700;color:var(--gold);}
+.cal-day.disabled{color:var(--border);cursor:not-allowed;}
+.cal-day.empty{cursor:default;}
+.time-section-title{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.6rem;}
+.time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;}
+.time-slot{text-align:center;padding:0.55rem;border:1px solid var(--border);border-radius:3px;font-size:0.82rem;cursor:pointer;transition:all 0.12s;}
+.time-slot:hover{border-color:var(--gold);color:var(--navy);}
+.time-slot.selected{background:var(--navy);color:var(--white);border-color:var(--navy);}
+.time-slot.blocked{background:var(--off2);color:var(--border);cursor:not-allowed;text-decoration:line-through;}
+.summary-card{background:var(--navy);border-radius:8px;overflow:hidden;position:sticky;top:80px;}
+.sum-head{background:rgba(201,150,58,0.18);border-bottom:1px solid rgba(255,255,255,0.08);padding:1.4rem 1.6rem;}
+.sum-head h3{font-family:'Playfair Display',serif;font-weight:600;font-size:1.05rem;color:var(--white);margin-bottom:0.15rem;}
+.sum-head p{font-size:0.75rem;color:rgba(255,255,255,0.4);}
+.sum-body{padding:1.4rem 1.6rem;display:flex;flex-direction:column;gap:1rem;}
+.sum-row{display:flex;align-items:flex-start;gap:0.8rem;}
+.sum-ico{width:32px;height:32px;background:rgba(201,150,58,0.1);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+.sum-label{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.1rem;}
+.sum-val{font-size:0.87rem;color:rgba(255,255,255,0.85);font-weight:500;}
+.sum-val.empty{color:rgba(255,255,255,0.25);font-style:italic;}
+.sum-info{border-top:1px solid rgba(255,255,255,0.08);padding:1.2rem 1.6rem;display:flex;flex-direction:column;gap:0.5rem;}
+.sum-info-row{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.78rem;color:rgba(255,255,255,0.4);}
+.confirm-wrap{text-align:center;padding:0.5rem 0;}
+.confirm-icon{width:72px;height:72px;background:var(--green-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;}
+.confirm-wrap h2{font-family:'Playfair Display',serif;font-weight:700;font-size:1.6rem;color:var(--navy);margin-bottom:0.5rem;}
+.confirm-wrap p{color:var(--muted);font-size:0.88rem;line-height:1.65;margin-bottom:1.5rem;max-width:360px;margin-left:auto;margin-right:auto;}
+.confirm-detail{background:var(--off);border:1px solid var(--border);border-radius:6px;padding:1.5rem;text-align:left;margin-bottom:1.2rem;display:flex;flex-direction:column;gap:0.75rem;}
+.cd-row{display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;}
+.wa-note{background:#dcfce7;border:1px solid #bbf7d0;border-radius:5px;padding:0.8rem 1rem;display:flex;align-items:center;gap:0.6rem;font-size:0.84rem;color:#166534;margin-bottom:1.2rem;}
+#servicios-sec{padding:5rem 4rem;background:var(--white);}
+.sec-inner{max-width:1100px;margin:0 auto;}
+.eyebrow{font-size:0.68rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem;}
+.eyebrow::before{content:'';width:18px;height:1px;background:var(--gold);}
+.sec-title{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(1.6rem,2.5vw,2.4rem);color:var(--navy);letter-spacing:-0.02em;margin-bottom:0.6rem;}
+.sec-sub{font-size:0.95rem;color:var(--muted);line-height:1.7;max-width:480px;margin-bottom:2.5rem;}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
+.svc-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:1.8rem;transition:box-shadow 0.2s,transform 0.2s;}
+.svc-card:hover{box-shadow:0 6px 24px rgba(11,28,58,0.1);transform:translateY(-2px);}
+.svc-icon{font-size:1.8rem;margin-bottom:0.8rem;display:block;}
+.svc-name{font-family:'Playfair Display',serif;font-weight:600;font-size:1rem;color:var(--navy);margin-bottom:0.4rem;}
+.svc-desc{font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:0.8rem;}
+.svc-meta{display:flex;align-items:center;justify-content:space-between;}
+.svc-price{font-weight:700;font-size:0.95rem;color:var(--gold);}
+.svc-dur{font-size:0.78rem;color:var(--muted);}
+#contacto-sec{padding:5rem 4rem;background:var(--navy);}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;}
+.contact-info{display:flex;flex-direction:column;gap:1.2rem;}
+.contact-item{display:flex;align-items:flex-start;gap:1rem;}
+.ci-icon{width:44px;height:44px;background:rgba(201,150,58,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.ci-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:0.2rem;}
+.ci-value{font-size:0.88rem;color:rgba(255,255,255,0.8);font-weight:500;}
+.ci-value a{color:var(--gold2);text-decoration:none;}
+.ci-value a:hover{text-decoration:underline;}
+.schedule-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:1.6rem;}
+.schedule-title{font-family:'Playfair Display',serif;font-weight:600;font-size:0.98rem;color:var(--white);margin-bottom:1rem;}
+.sch-row{display:flex;justify-content:space-between;align-items:center;padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.85rem;}
+.sch-row:last-child{border-bottom:none;}
+.sch-day{color:rgba(255,255,255,0.6);}
+.sch-hrs{color:rgba(255,255,255,0.85);font-weight:500;}
+.sch-badge{font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:2px;}
+.sch-open{background:rgba(26,122,60,0.2);color:#4CAF72;}
+.sch-closed{background:rgba(163,45,45,0.2);color:#E05252;}
+footer{background:var(--navy2);border-top:1px solid rgba(255,255,255,0.06);padding:1.5rem 4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.foot-logo{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:var(--white);display:flex;align-items:center;gap:5px;}
+.foot-logo::before{content:'';width:7px;height:7px;background:var(--gold);border-radius:50%;}
+footer p{font-size:0.78rem;color:rgba(255,255,255,0.3);}
+.foot-link{color:var(--gold2);text-decoration:none;font-size:0.8rem;font-weight:500;}
+.foot-link:hover{text-decoration:underline;}
+@media(max-width:900px){nav{padding:0 1.5rem;}.nav-links{display:none;} section[style*='grid-template-columns:1fr 1fr']{grid-template-columns:1fr !important;padding:4rem 1.5rem !important;} section[style*='grid-template-columns:1fr 1fr'] > div:nth-child(2){display:none !important;}.hero{padding:4rem 1.5rem 3rem;}.booking-section{padding:2rem 1rem 4rem;}.booking-wrap{grid-template-columns:1fr;}.summary-card{position:static;}.form-grid{grid-template-columns:1fr;}.time-grid{grid-template-columns:repeat(3,1fr);}#servicios-sec,#contacto-sec{padding:4rem 1.5rem;}.svc-grid{grid-template-columns:1fr;}.contact-grid{grid-template-columns:1fr;}footer{padding:1.5rem;flex-direction:column;text-align:center;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="#" class="nav-logo">Gestium</a>
+  <ul class="nav-links">
+    <li><a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Inicio</a></li>
+    <li><a href="#servicios-sec">Servicios</a></li>
+    <li><a href="#contacto-sec">Contacto</a></li>
+  </ul>
+</nav>
+<!-- HERO SIMPLE -->
+<section style="background:linear-gradient(160deg,var(--off) 0%,var(--off2) 100%);border-bottom:1px solid var(--border);padding:5rem 4rem 4rem;text-align:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(201,150,58,0.07) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;z-index:2;">
+    <div style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.3);color:var(--gold);padding:0.3rem 0.9rem;border-radius:100px;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem;">
+      <span style="width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite;"></span>
+      Reservas en línea disponibles
+    </div>
+    <h1 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(2.8rem,6vw,5rem);line-height:1.05;letter-spacing:-0.02em;color:var(--navy);margin-bottom:1rem;">
+      Reserva tu <em style="font-style:italic;color:var(--gold);">cita</em> en minutos
+    </h1>
+    <p style="font-size:1rem;font-weight:300;color:var(--muted);line-height:1.7;max-width:520px;margin:0 auto;">
+      Selecciona el día y horario que mejor se adapte a ti. Recibirás confirmación inmediata por WhatsApp.
+    </p>
+  </div>
+</section>
+
+<section class="booking-section">
+  <div class="booking-wrap">
+    <div>
+      <div class="steps-bar" id="steps-bar">
+        <div class="step-tab active" id="tab1"><div class="step-num">1</div> Tus Datos</div>
+        <div class="step-tab" id="tab2"><div class="step-num">2</div> Fecha y Hora</div>
+        <div class="step-tab" id="tab3"><div class="step-num">3</div> Confirmación</div>
+      </div>
+      <div id="step1" class="form-card">
+        <h2>Información del Paciente</h2>
+        <p>Completa tus datos para continuar</p>
+        <div class="form-grid">
+          <div class="form-group"><label>Nombre</label><input type="text" id="f-nombre" placeholder="Tu nombre" oninput="updateSummary()"></div>
+          <div class="form-group"><label>Apellido</label><input type="text" id="f-apellido" placeholder="Tu apellido" oninput="updateSummary()"></div>
+          <div class="form-group full"><label>Número de WhatsApp</label><div class="phone-wrap"><select id="f-pais"><option value="+52">MX +52</option><option value="+1">US +1</option><option value="+57">CO +57</option></select><input type="tel" id="f-telefono" placeholder="55 0000 0000" oninput="updateSummary()"></div></div>
+
+          <div class="form-group full"><label>Motivo de la cita <span style="font-weight:400;text-transform:none;">(Opcional)</span></label><textarea id="f-motivo" placeholder="Cuéntanos brevemente el motivo de tu consulta..."></textarea></div>
+        </div>
+        <button class="btn-continue" onclick="goStep2()">› Continuar — Elegir Fecha</button>
+      </div>
+      <div id="step2" class="form-card" style="display:none;">
+        <h2>Fecha y Hora</h2>
+        <p>Selecciona el día y horario de tu preferencia</p>
+        <div class="cal-header"><button class="cal-nav-btn" onclick="prevMonth()">‹</button><span class="cal-month-label" id="cal-month-label"></span><button class="cal-nav-btn" onclick="nextMonth()">›</button></div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="time-section-title">Horarios disponibles</div>
+        <div class="time-grid" id="time-grid"></div>
+        <button class="btn-continue" style="margin-top:1.5rem;" onclick="goStep3()">› Continuar — Confirmar</button>
+        <button class="btn-back" onclick="goStep1()">← Volver</button>
+      </div>
+      <div id="step3" class="form-card" style="display:none;">
+        <div class="confirm-wrap">
+          <div class="confirm-icon">✅</div>
+          <h2>¡Cita Confirmada!</h2>
+          <p>Tu cita ha sido registrada exitosamente. Recibirás un mensaje de confirmación en tu WhatsApp.</p>
+          <div class="confirm-detail" id="confirm-detail"></div>
+          <div class="wa-note"><span style="font-size:1.2rem;">💬</span><span>Te enviamos la confirmación a tu WhatsApp ahora mismo.</span></div>
+          <button class="btn-continue" onclick="resetForm()" style="border:none;cursor:pointer;">Agendar otra cita</button>
+          <button class="btn-back" onclick="window.scrollTo({top:0,behavior:'smooth'})">Volver al inicio</button>
+        </div>
+      </div>
+    </div>
+    <div class="summary-card">
+      <div class="sum-head"><h3>Resumen de tu Cita</h3><p>Se actualiza en tiempo real</p></div>
+      <div class="sum-body">
+        <div class="sum-row"><div class="sum-ico">👤</div><div><div class="sum-label">Paciente</div><div class="sum-val empty" id="sum-nombre">Sin nombre aún</div></div></div>
+        <div class="sum-row"><div class="sum-ico">📱</div><div><div class="sum-label">WhatsApp</div><div class="sum-val empty" id="sum-tel">Sin número</div></div></div>
+
+        <div class="sum-row"><div class="sum-ico">📅</div><div><div class="sum-label">Fecha</div><div class="sum-val empty" id="sum-fecha">Sin seleccionar</div></div></div>
+        <div class="sum-row"><div class="sum-ico">🕐</div><div><div class="sum-label">Hora</div><div class="sum-val empty" id="sum-hora">Sin seleccionar</div></div></div>
+      </div>
+      <div class="sum-info">
+        <div class="sum-info-row"><span>📍</span><span>Av. Costera Miguel Alemán, Acapulco</span></div>
+        <div class="sum-info-row"><span>📞</span><span>+52 744 354 1354</span></div>
+        <div class="sum-info-row"><span>🕐</span><span>Lun–Vie: 9AM–7PM · Sáb: 9AM–2PM</span></div>
+      </div>
+      <div style="padding:1.2rem 1.6rem;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.6rem;">Acceso administrador</div>
+        <a href="agendapro-admin.html" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;background:rgba(201,150,58,0.12);border:1px solid rgba(201,150,58,0.25);color:var(--gold2);padding:0.7rem 1rem;border-radius:4px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(201,150,58,0.2)'" onmouseout="this.style.background='rgba(201,150,58,0.12)'">
+          ⚙️ Abrir Panel Admin
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- FEATURES NAVY -->
+<section style="background:var(--navy);padding:5rem 4rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;"></div>
+  <div style="position:absolute;top:-150px;right:-150px;width:500px;height:500px;background:radial-gradient(circle,rgba(201,150,58,0.1) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;z-index:2;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:0.6rem;margin-bottom:1.5rem;">
+      <span style="width:20px;height:1px;background:var(--gold);display:inline-block;"></span>
+      GESTIUM · SOLUCIONES DIGITALES
+    </div>
+    <h2 style="font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(2.4rem,4vw,3.8rem);line-height:1.05;letter-spacing:-0.02em;color:var(--white);margin-bottom:1.5rem;">
+      Tu cita,<br>
+      <em style="font-style:italic;color:var(--gold2);">cuando y donde</em><br>
+      lo necesites
+    </h2>
+    <p style="font-size:1rem;font-weight:300;line-height:1.75;color:rgba(255,255,255,0.55);max-width:420px;margin-bottom:2.5rem;border-left:2px solid rgba(201,150,58,0.3);padding-left:1.2rem;">
+      Agenda tu consulta en minutos. Elige el servicio, la fecha y el horario que más te convenga — sin llamadas, sin esperas.
+    </p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})" style="background:var(--gold);color:var(--navy);border:none;padding:0.9rem 2rem;border-radius:4px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;" onmouseover="this.style.background='#E8B86D'" onmouseout="this.style.background='#C9963A'">Agendar ahora →</button>
+      <a href="#servicios-sec" style="border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);padding:0.9rem 2rem;border-radius:4px;font-size:0.92rem;font-weight:500;text-decoration:none;">Ver servicios</a>
+    </div>
+    <div style="display:flex;gap:2.5rem;margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.1);">
+      <div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;color:var(--white);line-height:1;">500<span style="color:var(--gold);">+</span></div><div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.2rem;">Pacientes atendidos</div></div>
+      <div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;color:var(--white);line-height:1;">98<span style="color:var(--gold);">%</span></div><div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.2rem;">Satisfacción</div></div>
+      <div><div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.9rem;color:var(--white);line-height:1;">5<span style="color:var(--gold);">+</span></div><div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.2rem;">Años de experiencia</div></div>
+    </div>
+  </div>
+  <div style="position:relative;z-index:2;display:flex;flex-direction:column;gap:1rem;">
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem 1.6rem;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='rgba(255,255,255,0.09)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+      <div style="width:44px;height:44px;background:rgba(201,150,58,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📅</div>
+      <div><div style="font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:0.15rem;">Agenda online 24/7</div><div style="font-size:0.78rem;color:rgba(255,255,255,0.45);">Elige tu horario sin llamar</div></div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem 1.6rem;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='rgba(255,255,255,0.09)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+      <div style="width:44px;height:44px;background:rgba(201,150,58,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">💬</div>
+      <div><div style="font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:0.15rem;">Confirmación por WhatsApp</div><div style="font-size:0.78rem;color:rgba(255,255,255,0.45);">Recibes tu cita al instante</div></div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem 1.6rem;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='rgba(255,255,255,0.09)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+      <div style="width:44px;height:44px;background:rgba(201,150,58,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🔔</div>
+      <div><div style="font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:0.15rem;">Recordatorio automático</div><div style="font-size:0.78rem;color:rgba(255,255,255,0.45);">Te avisamos un día antes</div></div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:1.2rem 1.6rem;display:flex;align-items:center;gap:1rem;" onmouseover="this.style.background='rgba(255,255,255,0.09)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+      <div style="width:44px;height:44px;background:rgba(201,150,58,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🔄</div>
+      <div><div style="font-weight:600;font-size:0.9rem;color:var(--white);margin-bottom:0.15rem;">Reagenda fácilmente</div><div style="font-size:0.78rem;color:rgba(255,255,255,0.45);">Modifica tu cita en cualquier momento</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="servicios-sec" style="padding:5rem 4rem;background:var(--white);"><div class="sec-inner">
+  <div class="eyebrow">Servicios</div>
+  <h2 class="sec-title">Tu negocio,<br>como tú lo imaginas</h2>
+  <p class="sec-sub" style="max-width:680px;margin-bottom:0.5rem;">Esta sección es completamente tuya. Puedes mostrar tus servicios con tarjetas, imágenes, descripciones, precios o sin ellos — en el diseño que mejor represente a tu negocio. Nosotros lo construimos exactamente como lo necesitas.</p>
+  <p style="font-size:0.88rem;color:var(--gold);font-weight:600;margin-bottom:2.5rem;">No estás forzado a usar recuadros. Podemos diseñarlo como quieras.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2rem;">
+
+    <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 28px rgba(11,28,58,0.12)';this.style.transform='translateY(-3px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="height:160px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;">🩺</div>
+      <div style="padding:1.4rem;">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:1rem;color:var(--navy);margin-bottom:0.4rem;">Con imagen y descripción</div>
+        <p style="font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:0.8rem;">Puedes usar fotografías reales de tu consultorio, productos o equipo para que el cliente conozca tu espacio antes de llegar.</p>
+        <span style="font-size:0.75rem;background:var(--off2);color:var(--navy);padding:0.2rem 0.6rem;border-radius:3px;font-weight:600;">Opción con foto</span>
+      </div>
+    </div>
+
+    <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 28px rgba(11,28,58,0.12)';this.style.transform='translateY(-3px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="height:160px;background:linear-gradient(135deg,#C9963A 0%,#E8B86D 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;">💡</div>
+      <div style="padding:1.4rem;">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:1rem;color:var(--navy);margin-bottom:0.4rem;">Solo descripción, sin precio</div>
+        <p style="font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:0.8rem;">Si prefieres que los clientes te contacten para cotizar, puedes omitir los precios y enfocarte en los beneficios de cada servicio.</p>
+        <span style="font-size:0.75rem;background:var(--off2);color:var(--navy);padding:0.2rem 0.6rem;border-radius:3px;font-weight:600;">Sin precios visibles</span>
+      </div>
+    </div>
+
+    <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 8px 28px rgba(11,28,58,0.12)';this.style.transform='translateY(-3px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="height:160px;background:linear-gradient(135deg,#1A7A3C 0%,#2E9B54 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;">📋</div>
+      <div style="padding:1.4rem;">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:1rem;color:var(--navy);margin-bottom:0.4rem;">Lista completa con precios</div>
+        <p style="font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:0.8rem;">Si quieres transparencia total, mostramos nombre, descripción, precio y duración de cada servicio para que el cliente llegue seguro de lo que quiere.</p>
+        <span style="font-size:0.75rem;background:var(--off2);color:var(--navy);padding:0.2rem 0.6rem;border-radius:3px;font-weight:600;">Con precio y duración</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--navy);border-radius:8px;padding:2rem 2.5rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;">
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.1rem;color:var(--white);margin-bottom:0.5rem;">¿Cómo quieres mostrar tus servicios?</div>
+      <p style="font-size:0.88rem;color:rgba(255,255,255,0.55);line-height:1.65;">Cuéntanos a qué se dedica tu negocio y cómo quieres que se vea. Gestium diseña y configura toda esta sección con tu información real — servicios, imágenes, precios y el estilo que mejor represente tu marca.</p>
+    </div>
+    <div style="flex-shrink:0;">
+      <a href="https://wa.me/521234567890?text=Hola%20Gestium%2C%20me%20interesa%20AgendaPro%20para%20mi%20negocio" target="_blank" style="background:var(--gold);color:var(--navy);padding:0.85rem 1.6rem;border-radius:4px;font-weight:700;font-size:0.88rem;text-decoration:none;display:inline-block;white-space:nowrap;" onmouseover="this.style.background='#E8B86D'" onmouseout="this.style.background='#C9963A'">Hablemos por WhatsApp →</a>
+    </div>
+  </div>
+</div></section>
+<section id="contacto-sec"><div class="sec-inner">
+  <div class="eyebrow" style="color:var(--gold2);">Contacto</div>
+  <h2 class="sec-title" style="color:var(--white);">¿Tienes dudas?<br>Estamos para ayudarte</h2>
+  <p class="sec-sub" style="color:rgba(255,255,255,0.5);">Escríbenos por cualquiera de estos medios o visítanos en el consultorio.</p>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <div class="contact-item"><div class="ci-icon">📍</div><div><div class="ci-label">Dirección</div><div class="ci-value">Edificio St. Patrick, Consultorio 204<br>Av. Costera Miguel Alemán, Costa Azul<br>Acapulco de Juárez, Gro. 39900</div></div></div>
+      <div class="contact-item"><div class="ci-icon">📱</div><div><div class="ci-label">WhatsApp</div><div class="ci-value"><a href="https://wa.me/527443541354" target="_blank">+52 744 354 1354</a></div></div></div>
+      <div class="contact-item"><div class="ci-icon">📧</div><div><div class="ci-label">Correo</div><div class="ci-value"><a href="/cdn-cgi/l/email-protection#573f383b3617303224233e223a793a2f"><span class="__cf_email__" data-cfemail="1870777479587f7d6b6c716d75367560">[email&#160;protected]</span></a></div></div></div>
+    </div>
+    <div class="schedule-card">
+      <div class="schedule-title">🕐 Horarios de Atención</div>
+      <div class="sch-row"><span class="sch-day">Lunes</span><span class="sch-hrs">9:00 AM – 7:00 PM</span><span class="sch-badge sch-open">Abierto</span></div>
+      <div class="sch-row"><span class="sch-day">Martes</span><span class="sch-hrs">9:00 AM – 7:00 PM</span><span class="sch-badge sch-open">Abierto</span></div>
+      <div class="sch-row"><span class="sch-day">Miércoles</span><span class="sch-hrs">9:00 AM – 7:00 PM</span><span class="sch-badge sch-open">Abierto</span></div>
+      <div class="sch-row"><span class="sch-day">Jueves</span><span class="sch-hrs">9:00 AM – 7:00 PM</span><span class="sch-badge sch-open">Abierto</span></div>
+      <div class="sch-row"><span class="sch-day">Viernes</span><span class="sch-hrs">9:00 AM – 7:00 PM</span><span class="sch-badge sch-open">Abierto</span></div>
+      <div class="sch-row"><span class="sch-day">Sábado</span><span class="sch-hrs">9:00 AM – 2:00 PM</span><span class="sch-badge sch-open">Abierto</span></div>
+      <div class="sch-row"><span class="sch-day">Domingo</span><span class="sch-hrs">Cerrado</span><span class="sch-badge sch-closed">Cerrado</span></div>
+    </div>
+  </div>
+</div></section>
+<footer><div class="foot-logo">Gestium</div><p>© 2025 Gestium · Sistema de Reservas AgendaPro</p><a href="agendapro-admin.html" class="foot-link">Panel Admin →</a></footer>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const today=new Date();
+let calYear=today.getFullYear(),calMonth=today.getMonth(),selDate=null,selTime=null;
+function showStep(n){[1,2,3].forEach(i=>{document.getElementById('step'+i).style.display=i===n?'block':'none';const t=document.getElementById('tab'+i);t.className='step-tab'+(i===n?' active':i<n?' done':'');});}
+function goStep1(){showStep(1);}
+function goStep2(){if(!document.getElementById('f-nombre').value.trim()){alert('Por favor ingresa tu nombre.');return;}if(!document.getElementById('f-telefono').value.trim()){alert('Por favor ingresa tu WhatsApp.');return;}showStep(2);renderCalendar();}
+function goStep3(){if(!selDate||!selTime){alert('Por favor selecciona fecha y hora.');return;}saveAppt();showStep(3);renderConfirm();}
+function updateSummary(){const n=document.getElementById('f-nombre').value;const a=document.getElementById('f-apellido').value;const t=document.getElementById('f-telefono').value;const p=document.getElementById('f-pais').value;setSV('sum-nombre',(n||a)?(n+' '+a).trim():null,'Sin nombre aún');setSV('sum-tel',t?p+' '+t:null,'Sin número');}
+function setSV(id,val,empty){const el=document.getElementById(id);el.textContent=val||empty;el.className=val?'sum-val':'sum-val empty';}
+function renderCalendar(){document.getElementById('cal-month-label').textContent=MONTHS[calMonth]+' '+calYear;const grid=document.getElementById('cal-grid');grid.innerHTML=DAYS.map(d=>`<div class="cal-day-name">${d}</div>`).join('');const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();for(let i=0;i<first;i++)grid.innerHTML+=`<div class="cal-day empty"></div>`;for(let d=1;d<=days;d++){const dt=new Date(calYear,calMonth,d);const isTod=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();const past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());const isSun=dt.getDay()===0;const isSel=selDate&&dt.toDateString()===selDate.toDateString();let cls='cal-day';if(past||isSun)cls+=' disabled';else if(isTod)cls+=' today';if(isSel)cls+=' selected';grid.innerHTML+=`<div class="${cls}" onclick="pickDate(${d})">${d}</div>`;}renderTimes();}
+function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}selDate=null;selTime=null;renderCalendar();}
+function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}selDate=null;selTime=null;renderCalendar();}
+function pickDate(d){selDate=new Date(calYear,calMonth,d);selTime=null;setSV('sum-fecha',selDate.toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),'Sin seleccionar');setSV('sum-hora',null,'Sin seleccionar');renderCalendar();}
+function renderTimes(){const grid=document.getElementById('time-grid');if(!selDate){grid.innerHTML='<div style="color:var(--muted);font-size:0.83rem;grid-column:1/-1;padding:0.5rem 0;">Selecciona una fecha para ver horarios</div>';return;}const slots=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];const booked=getBooked(selDate);grid.innerHTML=slots.map(t=>{const blk=booked.includes(t);const sel=t===selTime;return`<div class="time-slot${blk?' blocked':sel?' selected':''}" onclick="${blk?'':'pickTime(\''+t+'\')'}">${t}</div>`;}).join('');}
+function pickTime(t){selTime=t;setSV('sum-hora',t,'Sin seleccionar');renderTimes();}
+function getBooked(date){const appts=JSON.parse(localStorage.getItem('gestium_appts')||'[]');return appts.filter(a=>new Date(a.fecha).toDateString()===date.toDateString()&&a.estado!=='Cancelada').map(a=>a.hora);}
+function saveAppt(){const appts=JSON.parse(localStorage.getItem('gestium_appts')||'[]');const id=crypto.randomUUID();const appt={id,estado:'Pendiente',nombre:document.getElementById('f-nombre').value+' '+document.getElementById('f-apellido').value,whatsapp:document.getElementById('f-pais').value+document.getElementById('f-telefono').value,servicio:'Sin especificar',motivo:document.getElementById('f-motivo').value,fecha:selDate.toISOString(),hora:selTime,creadaEn:new Date().toISOString()};appts.push(appt);localStorage.setItem('gestium_appts',JSON.stringify(appts));sendWA(appt);}
+function sendWA(appt){const nombre=appt.nombre.split(' ')[0];const fechaFmt=new Date(appt.fecha).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});const msg=`✅ ¡Cita Confirmada!\nHola ${nombre}, tu cita en Gestium ha sido registrada.\n📅 Fecha: ${fechaFmt}\n🕐 Hora: ${appt.hora}\n🩺 Servicio: ${appt.servicio}\n🔗 Para cancelar o reagendar entra aquí:\nhttps://gestium.netlify.app/agendapro-reservas.html?cita=${appt.id}\nTe enviaremos un recordatorio el día anterior.`;window.open(`https://wa.me/${appt.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');}
+function renderConfirm(){const appts=JSON.parse(localStorage.getItem('gestium_appts')||'[]');const appt=appts[appts.length-1];const fecha=new Date(appt.fecha).toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('confirm-detail').innerHTML=`<div class="cd-row"><span>👤</span><strong>${appt.nombre}</strong></div><div class="cd-row"><span>🩺</span><span>${appt.servicio}</span></div><div class="cd-row"><span>📅</span><span>${fecha}</span></div><div class="cd-row"><span>🕐</span><span>${appt.hora}</span></div><div class="cd-row"><span>📱</span><span>${appt.whatsapp}</span></div>`;}
+function resetForm(){['f-nombre','f-apellido','f-telefono','f-motivo'].

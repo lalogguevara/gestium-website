@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgendaPro — Sistema de Citas Inteligente · Gestium</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:  #0B1C3A; --navy2: #132847; --navy3: #1C3559;
+  --gold:  #C9963A; --gold2: #E8B86D; --gold3: #F5D08A;
+  --white: #FFFFFF; --off: #F7F8FC; --off2: #EEF1F8;
+  --text:  #1A2840; --muted: #6B7A96; --border: #DDE3EE;
+  --green: #1A7A3C; --green-bg: #EEF9F0;
+  --red:   #A32D2D; --red-bg: #FCEBEB;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Outfit', sans-serif; background: var(--white); color: var(--text); overflow-x: hidden; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(11,28,58,0.97); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 4rem; height: 68px;
+}
+.nav-brand { display: flex; align-items: center; gap: 1rem; }
+.nav-logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: var(--white); display: flex; align-items: center; gap: 5px; }
+.nav-logo::before { content: ''; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; }
+.nav-sep { width: 1px; height: 18px; background: rgba(255,255,255,0.15); }
+.nav-product { font-size: 0.88rem; font-weight: 600; color: var(--gold); letter-spacing: 0.02em; }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--white); }
+.nav-cta { background: var(--gold); color: var(--navy); padding: 0.55rem 1.4rem; border-radius: 4px; font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: background 0.2s; }
+.nav-cta:hover { background: var(--gold2); }
+
+/* ── HERO ── */
+.hero {
+  background: var(--navy); min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; padding: 8rem 4rem 5rem;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.hero::after {
+  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(201,150,58,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(201,150,58,0.12); border: 1px solid rgba(201,150,58,0.3);
+  color: var(--gold2); padding: 0.35rem 1rem; border-radius: 100px;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 2rem; position: relative; z-index: 2;
+}
+.hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+  font-family: 'Playfair Display', serif; font-weight: 700;
+  font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.05;
+  letter-spacing: -0.03em; color: var(--white);
+  margin-bottom: 1.5rem; position: relative; z-index: 2;
+}
+.hero h1 em { font-style: italic; color: var(--gold2); }
+.hero h1 .line-outline { color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.3); }
+
+.hero-sub {
+  font-size: 1.15rem; font-weight: 300; line-height: 1.7;
+  color: rgba(255,255,255,0.55); max-width: 600px;
+  margin-bottom: 3rem; position: relative; z-index: 2;
+}
+
+.hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; z-index: 2; margin-bottom: 4rem; }
+.btn-primary { background: var(--gold); color: var(--navy); padding: 1rem 2.2rem; border-radius: 4px; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: background 0.2s, transform 0.2s; display: inline-block; }
+.btn-primary:hover { background: var(--gold2); transform: translateY(-2px); }
+.btn-outline-w { border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.8); padding: 1rem 2.2rem; border-radius: 4px; font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: border-color 0.2s, color 0.2s; display: inline-block; }
+.btn-outline-w:hover { border-color: rgba(255,255,255,0.6); color: var(--white); }
+
+.hero-stats { display: flex; gap: 3rem; justify-content: center; padding-top: 3rem; border-top: 1px solid rgba(255,255,255,0.08); position: relative; z-index: 2; }
+.stat-n { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2.2rem; color: var(--white); line-height: 1; }
+.stat-n span { color: var(--gold); }
+.stat-l { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem; letter-spacing: 0.05em; }
+
+/* ── SECTION BASE ── */
+.sec { padding: 6rem 4rem; }
+.sec-inner { max-width: 1100px; margin: 0 auto; }
+.eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+.eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--gold); }
+.sec-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: clamp(1.8rem, 3vw, 2.8rem); line-height: 1.15; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 1rem; }
+.sec-sub { font-size: 1rem; color: var(--muted); line-height: 1.7; max-width: 520px; margin-bottom: 3rem; }
+
+/* ── PROBLEMS ── */
+#problemas { background: var(--off); }
+.problems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.problem-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+  padding: 2rem; position: relative; overflow: hidden;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+.problem-card:hover { box-shadow: 0 8px 28px rgba(11,28,58,0.1); transform: translateY(-3px); }
+.problem-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--red-bg); }
+.prob-icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; }
+.prob-title { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 1rem; color: var(--navy); margin-bottom: 0.5rem; }
+.prob-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
+.prob-quote { font-size: 0.82rem; font-style: italic; color: var(--red); margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+
+/* ── SOLUTION / FEATURES ── */
+#funciones { background: var(--white); }
+.features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.feat-card { background: var(--white); padding: 2.2rem 2rem; transition: background 0.2s; }
+.feat-card:hover { background: var(--off); }
+.feat-card:hover .feat-num { color: var(--gold); }
+.feat-num { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: var(--border); line-height: 1; margin-bottom: 0.8rem; transition: color 0.2s; }
+.feat-icon { font-size: 1.6rem; margin-bottom: 0.8rem; display: block; }
+.feat-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 0.5rem; }
+.feat-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
+.feat-tag { display: inline-block; background: var(--off2); color: var(--navy); font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 3px; margin-top: 0.8rem; border: 1px solid var(--border); }
+
+/* ── PERSONALIZACION ── */
+#personaliza { background: var(--navy); }
+.pers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+.pers-left {}
+.pers-right { display: flex; flex-direction: column; gap: 1rem; }
+.pers-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color 0.2s, background 0.2s; }
+.pers-item:hover { border-color: rgba(201,150,58,0.4); background: rgba(255,255,255,0.07); }
+.pers-ico { width: 40px; height: 40px; background: rgba(201,150,58,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.pers-title { font-weight: 600; font-size: 0.9rem; color: var(--white); margin-bottom: 0.2rem; }
+.pers-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+/* ── PORQUE NOSOTROS ── */
+#porque { background: var(--off); }
+.porque-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.porque-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; }
+.porque-card::before { content: attr(data-num); font-family: 'Playfair Display', serif; font-size: 4rem; font-weight: 700; color: var(--off2); display: block; line-height: 1; margin-bottom: 0.8rem; }
+.porque-title { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 0.5rem; }
+.porque-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
+.porque-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--green); margin-top: 0.8rem; font-weight: 600; }
+
+/* ── MENSAJES WHATSAPP ── */
+#whatsapp { background: var(--white); }
+.wa-showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+.wa-left {}
+.wa-msgs { display: flex; flex-direction: column; gap: 1rem; }
+.wa-bubble {
+  background: var(--off); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1.2rem 1.4rem; font-size: 0.83rem; line-height: 1.65; color: var(--text);
+  position: relative;
+}
+.wa-bubble::before { content: attr(data-label); position: absolute; top: -10px; left: 12px; background: var(--gold); color: var(--navy); font-size: 0.62rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase; }
+.wa-bubble strong { color: var(--navy); }
+.wa-time { font-size: 0.72rem; color: var(--muted); margin-top: 0.5rem; text-align: right; }
+
+/* ── RECURRENTES FEATURE ── */
+#recurrentes-sec { background: var(--navy); }
+.rec-flow { display: flex; flex-direction: column; gap: 0; max-width: 600px; }
+.rec-step { display: flex; align-items: flex-start; gap: 1.2rem; padding: 1.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.rec-step:last-child { border-bottom: none; }
+.rec-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; font-weight: 700; font-family: 'Playfair Display', serif; }
+.rec-circle.gold { background: rgba(201,150,58,0.15); color: var(--gold); border: 1px solid rgba(201,150,58,0.3); }
+.rec-circle.orange { background: rgba(255,107,53,0.15); color: #FF6B35; border: 1px solid rgba(255,107,53,0.3); }
+.rec-circle.red { background: rgba(163,45,45,0.15); color: #E05252; border: 1px solid rgba(163,45,45,0.3); }
+.rec-circle.green { background: rgba(26,122,60,0.15); color: #4CAF72; border: 1px solid rgba(26,122,60,0.3); }
+.rec-body {}
+.rec-title { font-weight: 600; font-size: 0.92rem; color: var(--white); margin-bottom: 0.2rem; }
+.rec-desc { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+.rec-right-col { display: flex; flex-direction: column; gap: 1rem; }
+.rec-benefit { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 1.4rem; }
+.rec-benefit-title { font-weight: 600; font-size: 0.88rem; color: var(--gold2); margin-bottom: 0.4rem; }
+.rec-benefit-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+.rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+/* ── DEMO CTA ── */
+#demo-cta {
+  background: var(--off2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 6rem 4rem; text-align: center;
+}
+.demo-cta-inner { max-width: 700px; margin: 0 auto; }
+.demo-cta-inner h2 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: clamp(2rem, 4vw, 3.2rem); color: var(--navy); letter-spacing: -0.02em; margin-bottom: 1rem; line-height: 1.2; }
+.demo-cta-inner p { color: var(--muted); font-size: 1rem; line-height: 1.7; margin-bottom: 2.5rem; }
+.demo-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.btn-navy { background: var(--navy); color: var(--white); padding: 1rem 2.2rem; border-radius: 4px; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: background 0.2s, transform 0.2s; display: inline-block; }
+.btn-navy:hover { background: var(--navy2); transform: translateY(-2px); }
+.demo-note { font-size: 0.8rem; color: var(--muted); }
+.demo-note strong { color: var(--navy); }
+
+/* ── FOOTER ── */
+footer { background: var(--navy); padding: 2.5rem 4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-top: 1px solid rgba(255,255,255,0.06); }
+.foot-logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: var(--white); display: flex; align-items: center; gap: 5px; }
+.foot-logo::before { content: ''; width: 7px; height: 7px; background: var(--gold); border-radius: 50%; }
+.foot-logo span { color: var(--gold); margin-left: 4px; font-size: 0.85rem; font-family: 'Outfit',sans-serif; font-weight: 400; }
+footer p { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+.foot-link { color: var(--gold); text-decoration: none; font-size: 0.82rem; font-weight: 500; }
+.foot-link:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 0 1.5rem; }
+  .nav-links { display: none; }
+  .sec { padding: 4rem 1.5rem; }
+  .hero { padding: 7rem 1.5rem 4rem; }
+  .problems-grid, .features-grid, .porque-grid { grid-template-columns: 1fr; }
+  .pers-grid, .wa-showcase, .rec-grid { grid-template-columns: 1fr; gap: 2rem; }
+  #demo-cta { padding: 4rem 1.5rem; }
+  footer { padding: 2rem 1.5rem; flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">Gestium</div>
+    <div class="nav-sep"></div>
+    <div class="nav-product">AgendaPro</div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#problemas">Problemas</a></li>
+    <li><a href="#funciones">Funciones</a></li>
+    <li><a href="#personaliza">Personalización</a></li>
+    <li><a href="#demo-cta">Demo</a></li>
+  </ul>
+  <a href="agendapro-reservas.html" class="nav-cta" target="_blank">Ver demo →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Nuevo producto · Gestium</div>
+  <h1>
+    Tu agenda,<br>
+    <em>siempre llena.</em><br>
+    <span class="line-outline">Sin llamadas.</span>
+  </h1>
+  <p class="hero-sub">AgendaPro es el sistema de reservas inteligente que automatiza tus citas, reduce cancelaciones y recupera pacientes que llevan tiempo sin visitarte — todo desde WhatsApp.</p>
+  <div class="hero-btns">
+    <a href="agendapro-reservas.html" target="_blank" class="btn-primary">Ver demo en vivo →</a>
+    <a href="#problemas" class="btn-outline-w">¿Cómo funciona?</a>
+  </div>
+  <div class="hero-stats">
+    <div><div class="stat-n">0<span>%</span></div><div class="stat-l">Llamadas perdidas</div></div>
+    <div><div class="stat-n">3<span>x</span></div><div class="stat-l">Menos cancelaciones</div></div>
+    <div><div class="stat-n">100<span>%</span></div><div class="stat-l">Personalizable</div></div>
+  </div>
+</section>
+
+<!-- PROBLEMAS QUE RESUELVE -->
+<section class="sec" id="problemas">
+  <div class="sec-inner">
+    <div class="eyebrow">El problema</div>
+    <h2 class="sec-title">¿Te suena familiar<br>alguna de estas situaciones?</h2>
+    <p class="sec-sub">Estos son los dolores más comunes de clínicas, consultorios y negocios de servicios. AgendaPro los resuelve todos.</p>
+    <div class="problems-grid">
+      <div class="problem-card">
+        <span class="prob-icon">📞</span>
+        <div class="prob-title">Llamadas perdidas = citas perdidas</div>
+        <p class="prob-desc">Tu teléfono suena mientras atiendes a un paciente. Cuando devuelves la llamada, ya agendaron con alguien más.</p>
+        <div class="prob-quote">"Perdí 3 citas esta semana porque no pude contestar."</div>
+      </div>
+      <div class="problem-card">
+        <span class="prob-icon">🕳️</span>
+        <div class="prob-title">Huecos vacíos en tu agenda</div>
+        <p class="prob-desc">Un paciente cancela a última hora y ese tiempo queda muerto. Sin sistema, es imposible llenarlo a tiempo.</p>
+        <div class="prob-quote">"Se me cancelaron 2 citas y no me avisaron con tiempo."</div>
+      </div>
+      <div class="problem-card">
+        <span class="prob-icon">😶</span>
+        <div class="prob-title">Pacientes que no regresan</div>
+        <p class="prob-desc">Tu paciente necesita volver en 6 meses, pero nadie lo recuerda. Ni él ni tú. Y se va con la competencia.</p>
+        <div class="prob-quote">"Tengo pacientes que no veo hace un año y no sé cómo contactarlos."</div>
+      </div>
+      <div class="problem-card">
+        <span class="prob-icon">📝</span>
+        <div class="prob-title">Agenda en papel o WhatsApp informal</div>
+        <p class="prob-desc">Manejas las citas en una libreta o en mensajes de WhatsApp. Imposible saber qué tienes mañana de un vistazo.</p>
+        <div class="prob-quote">"Se me cruzan citas porque las manejo por mensaje."</div>
+      </div>
+      <div class="problem-card">
+        <span class="prob-icon">⏰</span>
+        <div class="prob-title">Horas perdidas en recordatorios manuales</div>
+        <p class="prob-desc">Cada día mandas mensajes a mano para recordar citas. Eso es tiempo que deberías estar dedicando a tus pacientes.</p>
+        <div class="prob-quote">"Me toma 30 minutos cada mañana confirmar citas del día."</div>
+      </div>
+      <div class="problem-card">
+        <span class="prob-icon">🌙</span>
+        <div class="prob-title">No puedes recibir citas fuera de horario</div>
+        <p class="prob-desc">Tu paciente quiere agendar a las 10 pm cuando ya cerraste. Sin sistema, esa intención se pierde para siempre.</p>
+        <div class="prob-quote">"Varios pacientes me escriben de noche y al día siguiente ya no les interesa."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCIONES -->
+<section class="sec" id="funciones">
+  <div class="sec-inner">
+    <div class="eyebrow">La solución</div>
+    <h2 class="sec-title">Todo lo que necesitas<br>en un solo sistema</h2>
+    <p class="sec-sub">AgendaPro combina una página de reservas para tus pacientes con un panel de administración completo para ti.</p>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-num">01</div>
+        <span class="feat-icon">📅</span>
+        <div class="feat-title">Reservas online 24/7</div>
+        <p class="feat-desc">Tu paciente elige servicio, fecha y hora desde su teléfono, en cualquier momento del día. Sin llamadas, sin mensajes de ida y vuelta.</p>
+        <span class="feat-tag">Página pública incluida</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">02</div>
+        <span class="feat-icon">💬</span>
+        <div class="feat-title">WhatsApp automático al confirmar</div>
+        <p class="feat-desc">En cuanto el paciente agenda, recibe en su WhatsApp los detalles completos de su cita con un link para cancelar o reagendar si necesita.</p>
+        <span class="feat-tag">Mensaje inmediato</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">03</div>
+        <span class="feat-icon">🔔</span>
+        <div class="feat-title">Recordatorios automáticos</div>
+        <p class="feat-desc">El día anterior a la cita, el sistema manda un recordatorio automático al paciente. Reduce las inasistencias sin que hagas nada.</p>
+        <span class="feat-tag">Sin esfuerzo manual</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">04</div>
+        <span class="feat-icon">📊</span>
+        <div class="feat-title">Panel admin completo</div>
+        <p class="feat-desc">Vista de todas tus citas, agenda semanal tipo calendario, estadísticas en tiempo real y control total para confirmar, cancelar o mover citas.</p>
+        <span class="feat-tag">Vista de calendario incluida</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">05</div>
+        <span class="feat-icon">⚙️</span>
+        <div class="feat-title">Reglas configurables</div>
+        <p class="feat-desc">Defines tus horarios, días laborales, tiempo mínimo para cancelar y puedes bloquear fechas específicas — días festivos, vacaciones o reuniones.</p>
+        <span class="feat-tag">Control total del admin</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-num">06</div>
+        <span class="feat-icon">🔄</span>
+        <div class="feat-title">Seguimiento de pacientes recurrentes</div>
+        <p class="feat-desc">Defines cada cuánto tiempo debe regresar cada paciente. El sistema les escribe automáticamente cuando es momento de su siguiente cita — hasta 3 recordatorios.</p>
+        <span class="feat-tag">Exclusivo AgendaPro</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERSONALIZACIÓN -->
+<section class="sec" id="personaliza" style="background: var(--navy);">
+  <div class="sec-inner">
+    <div class="pers-grid">
+      <div class="pers-left">
+        <div class="eyebrow" style="color:var(--gold2);">Personalización</div>
+        <h2 class="sec-title" style="color:var(--white);">Se adapta a tu<br>negocio, no al revés</h2>
+        <p class="sec-sub" style="color:rgba(255,255,255,0.5);">AgendaPro no es una plantilla genérica. Lo construimos para que se vea y funcione exactamente como tu negocio lo necesita.</p>
+        <a href="#demo-cta" class="btn-primary" style="display:inline-block;">Ver cómo quedaría →</a>
+      </div>
+      <div class="pers-right">
+        <div class="pers-item">
+          <div class="pers-ico">🎨</div>
+          <div><div class="pers-title">Colores y marca de tu negocio</div><div class="pers-desc">Logo, paleta de colores y tipografía que reflejan tu identidad. Tu página, no la nuestra.</div></div>
+        </div>
+        <div class="pers-item">
+          <div class="pers-ico">🩺</div>
+          <div><div class="pers-title">Tus servicios y precios</div><div class="pers-desc">Cada tratamiento, duración y precio aparece tal como tú lo ofreces. Puedes actualizar cuando quieras.</div></div>
+        </div>
+        <div class="pers-item">
+          <div class="pers-ico">🕐</div>
+          <div><div class="pers-title">Tu horario exacto</div><div class="pers-desc">Lunes a viernes, sábados, días específicos, horarios distintos por día. El sistema respeta tus reglas al 100%.</div></div>
+        </div>
+        <div class="pers-item">
+          <div class="pers-ico">💬</div>
+          <div><div class="pers-title">Mensajes en tu tono y voz</div><div class="pers-desc">Los mensajes de WhatsApp llevan el nombre de tu clínica y el estilo de comunicación que prefieras.</div></div>
+        </div>
+        <div class="pers-item">
+          <div class="pers-ico">📍</div>
+          <div><div class="pers-title">Tu información de contacto</div><div class="pers-desc">Dirección, teléfono, redes sociales y todo lo que tus pacientes necesitan saber — en tu página.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENSAJES WHATSAPP -->
+<section class="sec" id="whatsapp">
+  <div class="sec-inner">
+    <div class="eyebrow">WhatsApp integrado</div>
+    <h2 class="sec-title">Cada momento,<br>el mensaje correcto</h2>
+    <p class="sec-sub">El sistema envía automáticamente el mensaje adecuado según lo que pase con la cita del paciente.</p>
+    <div class="wa-showcase">
+      <div class="wa-msgs">
+        <div class="wa-bubble" data-label="Al agendar">
+          <strong>✅ ¡Cita Confirmada!</strong><br>
+          Hola María, tu cita ha sido registrada.<br>
+          📅 Fecha: 15 de Mayo 2025<br>
+          🕐 Hora: 10:00<br>
+          🩺 Servicio: Fisioterapia<br>
+          🔗 Para cancelar o reagendar entra aquí: <span style="color:var(--gold);">tu-clinica.com/?cita=abc123</span><br>
+          Te enviaremos un recordatorio el día anterior.
+          <div class="wa-time">10:32 AM ✓✓</div>
+        </div>
+        <div class="wa-bubble" data-label="Recordatorio">
+          <strong>⏰ Recordatorio de Cita</strong><br>
+          Hola María, te recordamos que mañana tienes cita.<br>
+          📅 Fecha: 15 de Mayo 2025<br>
+          🕐 Hora: 10:00<br>
+          ¿Confirmas tu asistencia?
+          <div class="wa-time">6:00 PM ✓✓</div>
+        </div>
+        <div class="wa-bubble" data-label="Al reagendar">
+          <strong>🔄 Cita Reagendada</strong><br>
+          Hola María, tu cita ha sido cambiada.<br>
+          📅 Nueva fecha: 20 de Mayo 2025<br>
+          🕐 Nueva hora: 11:00<br>
+          ¿Necesitas algún cambio? Entra aquí: <span style="color:var(--gold);">tu-clinica.com/?cita=abc123</span>
+          <div class="wa-time">3:15 PM ✓✓</div>
+        </div>
+      </div>
+      <div class="wa-left">
+        <div style="display:flex;flex-direction:column;gap:1.5rem;">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.4rem;color:var(--navy);margin-bottom:0.8rem;">Mensajes que se sienten personales</div>
+            <p style="font-size:0.9rem;color:var(--muted);line-height:1.7;">Cada mensaje incluye el nombre del paciente, los detalles exactos de su cita y un link único para gestionar cambios — sin que tengas que escribir nada.</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.7rem;">
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;color:var(--text);"><span style="color:var(--green);">✓</span> Confirmación al agendar</div>
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;color:var(--text);"><span style="color:var(--green);">✓</span> Recordatorio el día anterior</div>
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;color:var(--text);"><span style="color:var(--green);">✓</span> Notificación al reagendar</div>
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;color:var(--text);"><span style="color:var(--green);">✓</span> Aviso al cancelar</div>
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;color:var(--text);"><span style="color:var(--green);">✓</span> Recordatorios de pacientes recurrentes</div>
+          </div>
+          <div style="background:var(--off);border:1px solid var(--border);border-radius:6px;padding:1rem 1.2rem;">
+            <div style="font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.3rem;">¿Y si no contesta?</div>
+            <p style="font-size:0.83rem;color:var(--text);line-height:1.6;">Para pacientes recurrentes, el sistema envía hasta 3 recordatorios espaciados. Si no hay respuesta, el paciente aparece marcado en rojo en tu panel para que lo contactes directamente.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RECURRENTES -->
+<section class="sec" id="recurrentes-sec" style="background:var(--navy);">
+  <div class="sec-inner">
+    <div class="rec-grid">
+      <div>
+        <div class="eyebrow" style="color:var(--gold2);">Pacientes recurrentes</div>
+        <h2 class="sec-title" style="color:var(--white);">Nunca más pierdas<br>un paciente por olvido</h2>
+        <p class="sec-sub" style="color:rgba(255,255,255,0.5);margin-bottom:2rem;">El problema más costoso para dentistas, fisioterapeutas y nutriólogos es el paciente que "va a regresar pronto" y nunca lo hace. AgendaPro lo resuelve de forma automática.</p>
+        <div class="rec-flow">
+          <div class="rec-step">
+            <div class="rec-circle gold">1</div>
+            <div class="rec-body"><div class="rec-title">Tú defines el intervalo del paciente</div><div class="rec-desc">Desde el panel, configuras cuándo debe regresar cada paciente: 1 mes, 3 meses, 6 meses o 1 año.</div></div>
+          </div>
+          <div class="rec-step">
+            <div class="rec-circle gold">7d</div>
+            <div class="rec-body"><div class="rec-title">7 días antes → Mensaje 1</div><div class="rec-desc">El sistema le avisa que es tiempo de su próxima cita y le manda el link para agendar.</div></div>
+          </div>
+          <div class="rec-step">
+            <div class="rec-circle orange">+4d</div>
+            <div class="rec-body"><div class="rec-title">4 días después → Mensaje 2</div><div class="rec-desc">Si no agendó, recibe un segundo recordatorio más urgente.</div></div>
+          </div>
+          <div class="rec-step">
+            <div class="rec-circle orange">+4d</div>
+            <div class="rec-body"><div class="rec-title">4 días más → Mensaje 3 (último aviso)</div><div class="rec-desc">Tercer y último recordatorio antes de marcar el caso para revisión manual.</div></div>
+          </div>
+          <div class="rec-step">
+            <div class="rec-circle red">!</div>
+            <div class="rec-body"><div class="rec-title">Sin respuesta → Marcado en rojo</div><div class="rec-desc">Si después de 3 mensajes no agenda, aparece en rojo en tu panel. Posible cambio de número o ya no está disponible.</div></div>
+          </div>
+          <div class="rec-step">
+            <div class="rec-circle green">✓</div>
+            <div class="rec-body"><div class="rec-title">Agendó → Ciclo reinicia</div><div class="rec-desc">En cuanto confirma cita, el ciclo se reinicia automáticamente desde la nueva fecha.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="rec-right-col">
+        <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.1rem;color:var(--white);margin-bottom:0.8rem;">¿Para qué tipo de negocio funciona?</div>
+        <p style="font-size:0.83rem;color:rgba(255,255,255,0.5);line-height:1.65;margin-bottom:1rem;">Para cualquier negocio donde los clientes reserven su tiempo contigo. Si tienes servicios, tienes citas — y si tienes citas, AgendaPro te sirve.</p>
+        <div class="rec-benefit"><div class="rec-benefit-title">🦷 Salud y bienestar</div><div class="rec-benefit-desc">Dentistas, fisioterapeutas, nutriólogos, psicólogos, médicos generales. Citas periódicas que el sistema recuerda solo.</div></div>
+        <div class="rec-benefit"><div class="rec-benefit-title">💆 Belleza y estética</div><div class="rec-benefit-desc">Salones, spas, estéticas, barberías, tratamientos faciales. Tu cliente agenda su próxima visita sin tener que llamar.</div></div>
+        <div class="rec-benefit"><div class="rec-benefit-title">🏋️ Deporte y entrenamiento</div><div class="rec-benefit-desc">Entrenadores personales, clases de yoga, pilates, artes marciales. Reserva de sesiones individuales o grupales.</div></div>
+        <div class="rec-benefit"><div class="rec-benefit-title">🔧 Servicios técnicos y profesionales</div><div class="rec-benefit-desc">Talleres mecánicos, estudios de fotografía, consultores, abogados, contadores. Si cobras por tu tiempo, AgendaPro funciona.</div></div>
+        <div class="rec-benefit"><div class="rec-benefit-title">🍽️ Restaurantes con reservaciones</div><div class="rec-benefit-desc">Mesas, eventos privados, catas, clases de cocina. Tu cliente reserva su lugar en segundos desde su teléfono.</div></div>
+        <div style="background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.25);border-radius:6px;padding:1.2rem;">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--gold);margin-bottom:0.4rem;letter-spacing:0.06em;text-transform:uppercase;">La regla es simple</div>
+          <p style="font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.6;">Si tu negocio depende de que los clientes regresen, AgendaPro asegura que no se olviden — y que tú tampoco tengas que recordárselo manualmente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUÉ NOSOTROS -->
+<section class="sec" id="porque">
+  <div class="sec-inner">
+    <div class="eyebrow">Por qué Gestium</div>
+    <h2 class="sec-title">No somos una app genérica.<br>Somos tu equipo digital.</h2>
+    <p class="sec-sub">Hay decenas de plataformas de citas. Aquí está la diferencia con AgendaPro.</p>
+    <div class="porque-grid">
+      <div class="porque-card" data-num="01">
+        <div class="porque-title">Construido a tu medida</div>
+        <p class="porque-desc">AgendaPro no es una suscripción a una plataforma masiva. Es un sistema construido específicamente para ti, con tu marca y tus reglas.</p>
+        <div class="porque-check">✓ Sin logos de terceros en tu página</div>
+      </div>
+      <div class="porque-card" data-num="02">
+        <div class="porque-title">Sin cuotas mensuales sorpresa</div>
+        <p class="porque-desc">Pagas el desarrollo una vez. El mantenimiento mensual cubre que todo funcione siempre — no te cobramos por número de citas o por enviar más mensajes.</p>
+        <div class="porque-check">✓ Precio predecible, siempre</div>
+      </div>
+      <div class="porque-card" data-num="03">
+        <div class="porque-title">Soporte real, no tickets</div>
+        <p class="porque-desc">Cuando algo no funciona o quieres un cambio, nos escribes por WhatsApp y lo resolvemos. Sin formularios, sin esperar 3 días hábiles.</p>
+        <div class="porque-check">✓ Respuesta en menos de 48h</div>
+      </div>
+      <div class="porque-card" data-num="04">
+        <div class="porque-title">Crece con tu negocio</div>
+        <p class="porque-desc">¿Quieres agregar un segundo médico, nuevos servicios o integrar pagos en línea? El sistema crece según tus necesidades.</p>
+        <div class="porque-check">✓ Módulos adicionales disponibles</div>
+      </div>
+      <div class="porque-card" data-num="05">
+        <div class="porque-title">Tus datos, tu propiedad</div>
+        <p class="porque-desc">Toda la información de tus pacientes es tuya. Exportable, accesible y nunca compartida con terceros ni usada para marketing ajeno.</p>
+        <div class="porque-check">✓ 100% privacidad garantizada</div>
+      </div>
+      <div class="porque-card" data-num="06">
+        <div class="porque-title">Ya lo hemos hecho antes</div>
+        <p class="porque-desc">AgendaPro nació como una solución real para una clínica de fisioterapia en Acapulco. Lo que ves en la demo está probado en uso real, no es un prototipo.</p>
+        <div class="porque-check">✓ Probado en producción real</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO CTA -->
+<div id="demo-cta">
+  <div class="demo-cta-inner">
+    <div class="eyebrow" style="justify-content:center;">¿Listo para verlo?</div>
+    <h2>Pruébalo ahora.<br>Como si fueras tu propio paciente.</h2>
+    <p>La demo es real y funciona en este momento. Puedes agendar una cita de prueba, recibirás el mensaje de WhatsApp y verás exactamente cómo se ve el sistema desde el lado del paciente — y desde el panel admin.</p>
+    <div class="demo-btns">
+      <a href="agendapro-reservas.html" target="_blank" class="btn-navy">🔗 Abrir demo — Agendar cita</a>
+      <a href="agendapro-admin.html" target="_blank" class="btn-primary">Ver Panel Admin</a>
+    </div>
+    <div class="demo-note">
+      ¿Te interesa para tu negocio? <a href="https://wa.me/521234567890?text=Hola%20Gestium%2C%20me%20interesa%20AgendaPro%20para%20mi%20negocio" target="_blank" style="color:var(--navy);font-weight:600;">Escríbenos por WhatsApp →</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">Gestium <span>· AgendaPro</span></div>
+  <p>© 2025 Gestium. Sistema de reservas inteligente.</p>
+  <a href="index.html" class="foot-link">← Volver a Gestium</a>
+</footer>
+
+</body>
+</html>
