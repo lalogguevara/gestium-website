@@ -417,14 +417,18 @@ tr:hover td { background: var(--off); }
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ── SUPABASE ──
+const SUPABASE_URL = 'https://lypusugdltuhniwvgtck.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6TA0vRtKNEgrGHioCFn29Q_SaoiJk_i';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ── HELPERS ──
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const DAYS_FULL = ['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
 
-function getAppts() { return JSON.parse(localStorage.getItem('gestium_appts')||'[]'); }
-function saveAppts(a) { localStorage.setItem('gestium_appts', JSON.stringify(a)); }
 function getConfig() { return JSON.parse(localStorage.getItem('gestium_config')||'{"start":"09:00","end":"19:00","cancel":24,"duration":60,"days":[1,2,3,4,5,6]}'); }
 function saveConfigData(c) { localStorage.setItem('gestium_config', JSON.stringify(c)); }
 function getBlocks() { return JSON.parse(localStorage.getItem('gestium_blocks')||'[]'); }
@@ -432,12 +436,12 @@ function saveBlocks(b) { localStorage.setItem('gestium_blocks', JSON.stringify(b
 function getRecurrentes() { return JSON.parse(localStorage.getItem('gestium_rec')||'[]'); }
 function saveRecurrentes(r) { localStorage.setItem('gestium_rec', JSON.stringify(r)); }
 
-function fmtDate(iso) {
-  const d = new Date(iso);
+function fmtDate(val) {
+  const d = new Date((val||'').includes('T') ? val : val+'T12:00:00');
   return d.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
 }
-function fmtDateShort(iso) {
-  const d = new Date(iso);
+function fmtDateShort(val) {
+  const d = new Date((val||'').includes('T') ? val : val+'T12:00:00');
   return d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
 }
 
@@ -457,29 +461,29 @@ function doLogout() {
   document.getElementById('login-screen').style.display='flex';
 }
 
-// ── DEMO DATA SEED ──
-function seedDemoData() {
-  if (localStorage.getItem('gestium_seeded')) return;
+// ── DEMO DATA SEED en Supabase ──
+async function seedDemoData() {
+  if (localStorage.getItem('gestium_seeded_sb')) return;
   const today = new Date();
-  const d = (offset) => { const dt=new Date(today); dt.setDate(dt.getDate()+offset); return dt.toISOString(); };
+  const d = (offset) => { const dt=new Date(today); dt.setDate(dt.getDate()+offset); return dt.toISOString().split('T')[0]; };
   const appts = [
-    {id:crypto.randomUUID(),nombre:'Carmen Macías',whatsapp:'+527441361057',servicio:'Fisioterapia',motivo:'Espasmo lumbar',fecha:d(0),hora:'10:00',estado:'Confirmada',creadaEn:new Date().toISOString()},
-    {id:crypto.randomUUID(),nombre:'Gaby Nieto',whatsapp:'+527444483057',servicio:'Masaje Terapéutico',motivo:'Cavitación',fecha:d(0),hora:'11:00',estado:'Pendiente',creadaEn:new Date().toISOString()},
-    {id:crypto.randomUUID(),nombre:'Favio Torres',whatsapp:'+527442382216',servicio:'Electroterapia',motivo:'Descarga',fecha:d(0),hora:'12:00',estado:'Confirmada',creadaEn:new Date().toISOString()},
-    {id:crypto.randomUUID(),nombre:'Dora Pintos',whatsapp:'+527441817813',servicio:'Rehabilitación',motivo:'Terapia post-operatoria',fecha:d(0),hora:'15:00',estado:'Pendiente',creadaEn:new Date().toISOString()},
-    {id:crypto.randomUUID(),nombre:'Armando Terrazas',whatsapp:'+527441234567',servicio:'Evaluación Postural',motivo:'Dolor de espalda',fecha:d(-3),hora:'11:00',estado:'Confirmada',creadaEn:new Date().toISOString()},
-    {id:crypto.randomUUID(),nombre:'Laura Sánchez',whatsapp:'+527449876543',servicio:'Drenaje Linfático',motivo:'Retención de líquidos',fecha:d(1),hora:'09:00',estado:'Pendiente',creadaEn:new Date().toISOString()},
-    {id:crypto.randomUUID(),nombre:'Miguel Ángel Ruiz',whatsapp:'+527445551234',servicio:'Fisioterapia',motivo:'Rodilla',fecha:d(2),hora:'10:30',estado:'Pendiente',creadaEn:new Date().toISOString()},
+    {nombre:'Carmen Macías',whatsapp:'+527441361057',servicio:'Fisioterapia',motivo:'Espasmo lumbar',fecha:d(0),hora:'10:00',estado:'Confirmada'},
+    {nombre:'Gaby Nieto',whatsapp:'+527444483057',servicio:'Masaje Terapéutico',motivo:'Cavitación',fecha:d(0),hora:'11:00',estado:'Pendiente'},
+    {nombre:'Favio Torres',whatsapp:'+527442382216',servicio:'Electroterapia',motivo:'Descarga',fecha:d(0),hora:'12:00',estado:'Confirmada'},
+    {nombre:'Dora Pintos',whatsapp:'+527441817813',servicio:'Rehabilitación',motivo:'Terapia post-operatoria',fecha:d(0),hora:'15:00',estado:'Pendiente'},
+    {nombre:'Armando Terrazas',whatsapp:'+527441234567',servicio:'Evaluación Postural',motivo:'Dolor de espalda',fecha:d(-3),hora:'11:00',estado:'Confirmada'},
+    {nombre:'Laura Sánchez',whatsapp:'+527449876543',servicio:'Drenaje Linfático',motivo:'Retención de líquidos',fecha:d(1),hora:'09:00',estado:'Pendiente'},
+    {nombre:'Miguel Ángel Ruiz',whatsapp:'+527445551234',servicio:'Fisioterapia',motivo:'Rodilla',fecha:d(2),hora:'10:30',estado:'Pendiente'},
   ];
-  saveAppts(appts);
+  const {error} = await sb.from('citas').insert(appts);
+  if(!error) localStorage.setItem('gestium_seeded_sb','1');
   const recs = [
-    {id:crypto.randomUUID(),nombre:'Carmen Macías',whatsapp:'+527441361057',intervalo:6,ultimaCita:d(-180),mensajesEnviados:0,estado:'amarillo'},
-    {id:crypto.randomUUID(),nombre:'Roberto Vega',whatsapp:'+527441112233',intervalo:3,ultimaCita:d(-100),mensajesEnviados:2,estado:'naranja'},
-    {id:crypto.randomUUID(),nombre:'Patricia Moreno',whatsapp:'+527448887766',intervalo:12,ultimaCita:d(-400),mensajesEnviados:3,estado:'rojo'},
-    {id:crypto.randomUUID(),nombre:'Diego Hernández',whatsapp:'+527443334455',intervalo:2,ultimaCita:d(-5),mensajesEnviados:0,estado:'verde'},
+    {nombre:'Carmen Macías',whatsapp:'+527441361057',intervalo:6,mensajesEnviados:0,estado:'amarillo'},
+    {nombre:'Roberto Vega',whatsapp:'+527441112233',intervalo:3,mensajesEnviados:2,estado:'naranja'},
+    {nombre:'Patricia Moreno',whatsapp:'+527448887766',intervalo:12,mensajesEnviados:3,estado:'rojo'},
+    {nombre:'Diego Hernández',whatsapp:'+527443334455',intervalo:2,mensajesEnviados:0,estado:'verde'},
   ];
   saveRecurrentes(recs);
-  localStorage.setItem('gestium_seeded','1');
 }
 
 // ── TABS ──
@@ -494,24 +498,22 @@ function showTab(name) {
   if(name==='config') renderConfigForm();
 }
 
-function refreshAll() {
-  renderKPIs();
-  renderCitasTable();
+async function refreshAll() {
+  await renderKPIs();
+  await renderCitasTable();
   document.getElementById('config-today').textContent = new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 }
 
-// ── KPIs ──
-function renderKPIs() {
-  const appts = getAppts();
-  const today = new Date().toDateString();
-  const hoy = appts.filter(a=>new Date(a.fecha).toDateString()===today&&a.estado!=='Cancelada').length;
-  const week = appts.filter(a=>{
-    const d=new Date(a.fecha);
-    const now=new Date();
-    const start=new Date(now); start.setDate(now.getDate()-now.getDay());
-    const end=new Date(start); end.setDate(start.getDate()+6);
-    return d>=start&&d<=end&&a.estado!=='Cancelada';
-  }).length;
+// ── KPIs desde Supabase ──
+async function renderKPIs() {
+  const {data:appts} = await sb.from('citas').select('*');
+  if(!appts) return;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate()-now.getDay());
+  const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate()+6);
+  const hoy = appts.filter(a=>a.fecha===todayStr&&a.estado!=='Cancelada').length;
+  const week = appts.filter(a=>{const d=new Date(a.fecha+'T12:00:00');return d>=startOfWeek&&d<=endOfWeek&&a.estado!=='Cancelada';}).length;
   const conf = appts.filter(a=>a.estado==='Confirmada').length;
   const pend = appts.filter(a=>a.estado==='Pendiente').length;
   document.getElementById('kpi-grid').innerHTML = `
@@ -521,22 +523,23 @@ function renderKPIs() {
     <div class="kpi-card"><div class="kpi-num orange">${pend}</div><div class="kpi-lbl">Pendientes</div></div>`;
 }
 
-// ── CITAS TABLE ──
-function renderCitasTable() {
-  let appts = getAppts();
+// ── CITAS TABLE desde Supabase ──
+async function renderCitasTable() {
+  const tbody = document.getElementById('citas-tbody');
+  tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Cargando...</td></tr>`;
+  let query = sb.from('citas').select('*');
   const filterDate = document.getElementById('filter-date').value;
   const filterState = document.getElementById('filter-estado').value;
-  if(filterDate) appts = appts.filter(a=>new Date(a.fecha).toLocaleDateString('en-CA')===filterDate);
-  if(filterState) appts = appts.filter(a=>a.estado===filterState);
-  appts.sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)||a.hora.localeCompare(b.hora));
-  const tbody = document.getElementById('citas-tbody');
-  if(!appts.length){tbody.innerHTML=`<tr><td colspan="7" class="empty-state">No hay citas con estos filtros</td></tr>`;return;}
+  if(filterDate) query = query.eq('fecha', filterDate);
+  if(filterState) query = query.eq('estado', filterState);
+  const {data:appts} = await query.order('fecha').order('hora');
+  if(!appts||!appts.length){tbody.innerHTML=`<tr><td colspan="7" class="empty-state">No hay citas con estos filtros</td></tr>`;return;}
   tbody.innerHTML = appts.map(a=>`
     <tr>
       <td class="td-name">${a.nombre.toUpperCase()}</td>
       <td><div class="td-wa"><div class="wa-dot"></div>${a.whatsapp}</div></td>
       <td>${fmtDateShort(a.fecha)}</td>
-      <td>${a.hora}</td>
+      <td>${a.hora ? a.hora.substring(0,5) : ''}</td>
       <td>${a.servicio}</td>
       <td>${badgeHtml(a.estado)}</td>
       <td><div class="actions">${actionsHtml(a)}</div></td>
@@ -553,79 +556,62 @@ function badgeHtml(estado) {
 }
 
 function actionsHtml(a) {
-  let btns = `<button class="act-btn" onclick="openMoveModal('${a.id}')">Mover</button>`;
+  let btns = `<button class="act-btn" onclick="openMoveModal('${a.id}','${a.fecha}','${a.hora?a.hora.substring(0,5):''}','${a.nombre}','${a.servicio}','${a.whatsapp}')">Mover</button>`;
   if(a.estado!=='Cancelada') btns += `<button class="act-btn cancel" onclick="updateEstado('${a.id}','Cancelada')">Cancelar</button>`;
   if(a.estado==='Pendiente') btns += `<button class="act-btn confirm" onclick="updateEstado('${a.id}','Confirmada')">Confirmar</button>`;
   if(a.estado==='Confirmada'||a.estado==='Reagendada') btns += `<button class="act-btn" onclick="updateEstado('${a.id}','No asistió')">No asistió</button>`;
-  btns += `<button class="act-btn wa-btn" onclick="sendWaReminder('${a.id}')">💬 Recordatorio</button>`;
+  btns += `<button class="act-btn wa-btn" onclick="sendWaReminder('${a.id}','${a.nombre}','${a.fecha}','${a.hora?a.hora.substring(0,5):''}','${a.servicio}','${a.whatsapp}')">💬 Recordatorio</button>`;
   return btns;
 }
 
-function updateEstado(id, estado) {
-  const appts = getAppts();
-  const idx = appts.findIndex(a=>a.id===id);
-  if(idx<0) return;
-  appts[idx].estado = estado;
-  saveAppts(appts);
-  renderKPIs();
-  renderCitasTable();
+async function updateEstado(id, estado) {
+  await sb.from('citas').update({estado}).eq('id',id);
+  await refreshAll();
 }
 
-function sendWaReminder(id) {
-  const appt = getAppts().find(a=>a.id===id);
-  if(!appt) return;
-  const nombre = appt.nombre.split(' ')[0];
-  const fechaFmt = fmtDate(appt.fecha);
-  const msg = `⏰ Recordatorio de Cita\nHola ${nombre}, te recordamos que mañana tienes cita en Gestium.\n📅 Fecha: ${fechaFmt}\n🕐 Hora: ${appt.hora}\n🩺 Servicio: ${appt.servicio}\n¿Confirmas tu asistencia?`;
-  const num = appt.whatsapp.replace(/\D/g,'');
-  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
+function sendWaReminder(id,nombre,fecha,hora,servicio,whatsapp) {
+  const first = nombre.split(' ')[0];
+  const fechaFmt = fmtDate(fecha);
+  const msg = `⏰ Recordatorio de Cita\nHola ${first}, te recordamos que mañana tienes cita.\n📅 Fecha: ${fechaFmt}\n🕐 Hora: ${hora}\n🩺 Servicio: ${servicio}\n¿Confirmas tu asistencia?`;
+  window.open(`https://wa.me/${whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 
 // ── MOVE MODAL ──
 let moveApptId = null;
-function openMoveModal(id) {
-  moveApptId = id;
-  const appt = getAppts().find(a=>a.id===id);
+function openMoveModal(id,fecha,hora,nombre,servicio,whatsapp) {
+  moveApptId = {id,nombre,servicio,whatsapp};
   document.getElementById('modal-title').textContent = 'Mover cita';
-  document.getElementById('modal-sub').textContent = `Cita de ${appt.nombre} · ${appt.servicio}`;
+  document.getElementById('modal-sub').textContent = `Cita de ${nombre} · ${servicio}`;
   document.getElementById('modal-body').innerHTML = `
     <div class="form-row">
-      <div class="form-field"><label>Nueva fecha</label><input type="date" id="move-date" value="${new Date(appt.fecha).toLocaleDateString('en-CA')}"></div>
-      <div class="form-field"><label>Nueva hora</label><input type="time" id="move-time" value="${appt.hora}"></div>
+      <div class="form-field"><label>Nueva fecha</label><input type="date" id="move-date" value="${fecha}"></div>
+      <div class="form-field"><label>Nueva hora</label><input type="time" id="move-time" value="${hora}"></div>
     </div>`;
   document.getElementById('modal-confirm-btn').textContent = 'Reagendar';
   document.getElementById('modal-confirm-btn').onclick = confirmMove;
   document.getElementById('modal').style.display = 'flex';
 }
-function confirmMove() {
-  const appts = getAppts();
-  const idx = appts.findIndex(a=>a.id===moveApptId);
-  if(idx<0) return;
+async function confirmMove() {
   const newDate = document.getElementById('move-date').value;
   const newTime = document.getElementById('move-time').value;
-  const appt = appts[idx];
-  appt.fecha = new Date(newDate+'T12:00:00').toISOString();
-  appt.hora = newTime;
-  appt.estado = 'Reagendada';
-  saveAppts(appts);
+  await sb.from('citas').update({fecha:newDate, hora:newTime, estado:'Reagendada'}).eq('id',moveApptId.id);
   closeModal();
-  renderKPIs(); renderCitasTable();
-  // Send WA notification
-  const nombre = appt.nombre.split(' ')[0];
-  const fechaFmt = new Date(appt.fecha).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
-  const msg = `🔄 Cita Reagendada\nHola ${nombre}, tu cita en Gestium ha sido cambiada.\n📅 Nueva fecha: ${fechaFmt}\n🕐 Nueva hora: ${newTime}\n¿Necesitas hacer algún cambio? Entra aquí:\nhttps://gestium.netlify.app/?cita=${appt.id}\n¡Te esperamos!`;
-  const num = appt.whatsapp.replace(/\D/g,'');
-  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`,'_blank');
+  await refreshAll();
+  const {nombre,whatsapp} = moveApptId;
+  const first = nombre.split(' ')[0];
+  const fechaFmt = fmtDate(newDate);
+  const msg = `🔄 Cita Reagendada\nHola ${first}, tu cita ha sido cambiada.\n📅 Nueva fecha: ${fechaFmt}\n🕐 Nueva hora: ${newTime}\n¡Te esperamos!`;
+  window.open(`https://wa.me/${whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 function closeModal() { document.getElementById('modal').style.display='none'; }
 
-// ── WEEK CALENDAR ──
+// ── WEEK CALENDAR desde Supabase ──
 let weekOffset = 0;
 function prevWeek() { weekOffset--; renderWeekCalendar(); }
 function nextWeek() { weekOffset++; renderWeekCalendar(); }
 function goToday()  { weekOffset=0; renderWeekCalendar(); }
 
-function renderWeekCalendar() {
+async function renderWeekCalendar() {
   const today = new Date();
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (weekOffset*7));
@@ -634,9 +620,12 @@ function renderWeekCalendar() {
   const endOfWeek = days[5];
   document.getElementById('week-label').textContent = `${startOfWeek.getDate()} ${MONTHS[startOfWeek.getMonth()].slice(0,3)} — ${endOfWeek.getDate()} ${MONTHS[endOfWeek.getMonth()].slice(0,3)} ${endOfWeek.getFullYear()}`;
 
+  const startStr = startOfWeek.toISOString().split('T')[0];
+  const endStr = endOfWeek.toISOString().split('T')[0];
+  const {data:appts} = await sb.from('citas').select('*').gte('fecha',startStr).lte('fecha',endStr).neq('estado','Cancelada');
+
   const hours = [];
   for(let h=8;h<=18;h++) hours.push((h<10?'0':'')+h+':00');
-  const appts = getAppts();
 
   let html = '<div class="cal-admin-grid" style="min-width:700px;">';
   html += '<div class="cal-col-header"></div>';
@@ -647,18 +636,16 @@ function renderWeekCalendar() {
   hours.forEach(h=>{
     html+=`<div class="cal-time-label">${h}</div>`;
     days.forEach(d=>{
-      const dayAppts = appts.filter(a=>{
-        const ad = new Date(a.fecha);
-        return ad.toDateString()===d.toDateString()&&a.hora===h&&a.estado!=='Cancelada';
-      });
-      html+=`<div class="cal-cell">${dayAppts.map(a=>`<div class="cal-event ${a.estado.toLowerCase().replace(' ','')}${a.estado==='No asistió'?'cancelada':''}" title="${a.nombre} · ${a.servicio}">${a.nombre.split(' ')[0].toUpperCase()}</div>`).join('')}</div>`;
+      const dayStr = d.toISOString().split('T')[0];
+      const dayAppts = (appts||[]).filter(a=>a.fecha===dayStr&&a.hora&&a.hora.substring(0,5)===h);
+      html+=`<div class="cal-cell">${dayAppts.map(a=>`<div class="cal-event" title="${a.nombre} · ${a.servicio}">${a.nombre.split(' ')[0].toUpperCase()}</div>`).join('')}</div>`;
     });
   });
   html+='</div>';
   document.getElementById('cal-admin-container').innerHTML = html;
 }
 
-// ── CONFIG ──
+// ── CONFIG (localStorage) ──
 const DAYS_CONFIG = [{d:1,l:'LUN'},{d:2,l:'MAR'},{d:3,l:'MIÉ'},{d:4,l:'JUE'},{d:5,l:'VIE'},{d:6,l:'SÁB'},{d:0,l:'DOM'}];
 function renderConfigForm() {
   const cfg = getConfig();
@@ -754,8 +741,7 @@ function renderBlockList() {
   const list = document.getElementById('block-list');
   if(!Object.keys(grouped).length){list.innerHTML='<div style="color:var(--muted);font-size:0.85rem;padding:1rem;">No hay fechas bloqueadas</div>';return;}
   list.innerHTML = Object.entries(grouped).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,{dia,horas}])=>{
-    const d = new Date(date+'T12:00:00');
-    const label = d.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+    const label = fmtDate(date);
     if(dia) return `<div class="block-item"><div class="block-info"><div class="block-date">${label}</div><div class="block-detail">Día completo${dia.motivo?' · '+dia.motivo:''}</div></div><button class="btn-unblock" onclick="removeBlock('${dia.id}')">Desbloquear</button></div>`;
     return horas.map(h=>`<div class="block-item"><div class="block-info"><div class="block-date">${label}</div><div class="block-detail">${h.hora}${h.motivo?' · '+h.motivo:''}</div></div><button class="btn-unblock" onclick="removeBlock('${h.id}')">Desbloquear</button></div>`).join('');
   }).join('');
@@ -765,24 +751,23 @@ function removeBlock(id) {
   renderBlockList();
 }
 
-// ── RECURRENTES ──
+// ── RECURRENTES (localStorage) ──
 function renderRecurrentes() {
   const recs = getRecurrentes();
   const tbody = document.getElementById('rec-tbody');
   if(!recs.length){tbody.innerHTML='<tr><td colspan="7" class="empty-state">No hay pacientes recurrentes configurados</td></tr>';return;}
   tbody.innerHTML = recs.map(r=>{
-    const lastDate = fmtDateShort(r.ultimaCita);
-    const nextDate = new Date(r.ultimaCita);
+    const lastDate = r.ultimaCita ? fmtDateShort(r.ultimaCita) : '—';
+    const nextDate = r.ultimaCita ? new Date(r.ultimaCita) : new Date();
     nextDate.setMonth(nextDate.getMonth()+r.intervalo);
     const nextFmt = nextDate.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
-    const statusHtml = recStatusHtml(r);
     return `<tr>
       <td class="td-name">${r.nombre.toUpperCase()}</td>
       <td><div class="td-wa"><div class="wa-dot"></div>${r.whatsapp}</div></td>
       <td>Cada ${r.intervalo} mes${r.intervalo>1?'es':''}</td>
       <td>${lastDate}</td>
       <td>${nextFmt}</td>
-      <td>${statusHtml}</td>
+      <td>${recStatusHtml(r)}</td>
       <td><div class="actions">
         <button class="act-btn wa-btn" onclick="sendRecMsg('${r.id}')">💬 Enviar msg ${r.mensajesEnviados+1}</button>
         <button class="act-btn" onclick="markRecAgendado('${r.id}')">✅ Agendó</button>
@@ -793,12 +778,7 @@ function renderRecurrentes() {
 }
 
 function recStatusHtml(r) {
-  const map = {
-    'verde':    ['verde','● Agendado'],
-    'amarillo': ['amarillo','● Msg 1 pendiente'],
-    'naranja':  ['naranja','● Msg 2 pendiente'],
-    'rojo':     ['rojo','⚠ Sin respuesta'],
-  };
+  const map = {'verde':['verde','● Agendado'],'amarillo':['amarillo','● Msg 1 pendiente'],'naranja':['naranja','● Msg 2 pendiente'],'rojo':['rojo','⚠ Sin respuesta']};
   const [cls,label] = map[r.estado]||map['amarillo'];
   return `<span class="rec-status ${cls}">${label}</span>`;
 }
@@ -822,18 +802,15 @@ function sendRecMsg(id) {
   if(idx<0) return;
   const r = recs[idx];
   const nombre = r.nombre.split(' ')[0];
-  const nextDate = new Date(r.ultimaCita);
-  nextDate.setMonth(nextDate.getMonth()+r.intervalo);
   const msgs = [
-    `🔔 Hola ${nombre}, es tiempo de tu cita en Gestium.\nHan pasado ${r.intervalo} mes${r.intervalo>1?'es':''}. Agenda tu próxima cita aquí:\nhttps://gestium.netlify.app\n¡Te esperamos!`,
-    `📅 Hola ${nombre}, aún tienes tiempo de agendar tu cita en Gestium.\nNo dejes pasar más tiempo, tu bienestar es importante:\nhttps://gestium.netlify.app\n¡Te esperamos!`,
-    `⚠️ Último recordatorio, ${nombre}.\nEs importante que agendes tu cita en Gestium pronto.\nhttps://gestium.netlify.app`
+    `🔔 Hola ${nombre}, es tiempo de tu cita en Gestium.\nHan pasado ${r.intervalo} mes${r.intervalo>1?'es':''}. Agenda aquí:\nhttps://gestium-mx.netlify.app\n¡Te esperamos!`,
+    `📅 Hola ${nombre}, aún tienes tiempo de agendar tu cita.\nhttps://gestium-mx.netlify.app\n¡Te esperamos!`,
+    `⚠️ Último recordatorio, ${nombre}. Es importante que agendes tu cita pronto.\nhttps://gestium-mx.netlify.app`
   ];
   const msgIdx = Math.min(r.mensajesEnviados, 2);
-  const num = r.whatsapp.replace(/\D/g,'');
-  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msgs[msgIdx])}`,'_blank');
-  r.mensajesEnviados = Math.min(r.mensajesEnviados+1, 3);
-  r.estado = r.mensajesEnviados>=3 ? 'rojo' : r.mensajesEnviados===2 ? 'naranja' : 'amarillo';
+  window.open(`https://wa.me/${r.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msgs[msgIdx])}`,'_blank');
+  recs[idx].mensajesEnviados = Math.min(r.mensajesEnviados+1, 3);
+  recs[idx].estado = recs[idx].mensajesEnviados>=3?'rojo':recs[idx].mensajesEnviados===2?'naranja':'amarillo';
   saveRecurrentes(recs);
   renderRecurrentes();
 }
@@ -842,11 +819,8 @@ function markRecAgendado(id) {
   const recs = getRecurrentes();
   const idx = recs.findIndex(r=>r.id===id);
   if(idx<0) return;
-  recs[idx].mensajesEnviados = 0;
-  recs[idx].estado = 'verde';
-  recs[idx].ultimaCita = new Date().toISOString();
-  saveRecurrentes(recs);
-  renderRecurrentes();
+  recs[idx].mensajesEnviados=0; recs[idx].estado='verde'; recs[idx].ultimaCita=new Date().toISOString();
+  saveRecurrentes(recs); renderRecurrentes();
 }
 
 function removeRec(id) {
@@ -854,10 +828,8 @@ function removeRec(id) {
   renderRecurrentes();
 }
 
-// Auto-init (no login required for demo)
+// ── INIT ──
 document.getElementById('filter-date').value = new Date().toLocaleDateString('en-CA');
-seedDemoData();
-refreshAll();
 </script>
 </body>
 </html>
