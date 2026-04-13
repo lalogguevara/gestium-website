@@ -23,6 +23,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.97);backdrop
 .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.3);color:var(--gold);padding:0.3rem 0.9rem;border-radius:100px;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem;position:relative;z-index:2;}
 .hero-badge::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 .hero h1{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(2.4rem,5vw,4rem);line-height:1.1;letter-spacing:-0.02em;color:var(--navy);margin-bottom:1rem;position:relative;z-index:2;}
 .hero h1 em{font-style:italic;color:var(--gold);}
 .hero-sub{font-size:1rem;font-weight:300;color:var(--muted);line-height:1.7;max-width:520px;margin:0 auto;position:relative;z-index:2;}
@@ -194,7 +195,39 @@ footer p{font-size:0.78rem;color:rgba(255,255,255,0.3);}
           <h2>¡Cita Confirmada!</h2>
           <p>Tu cita ha sido registrada exitosamente. Recibirás un mensaje de confirmación en tu WhatsApp.</p>
           <div class="confirm-detail" id="confirm-detail"></div>
-          <div class="wa-note"><span style="font-size:1.2rem;">💬</span><span>Te enviamos la confirmación a tu WhatsApp ahora mismo.</span></div>
+          <div class="wa-note"><span style="font-size:1.2rem;">💬</span><span>En el sistema real, el mensaje llegaría automáticamente al WhatsApp del paciente.</span></div>
+
+          <!-- Burbuja WhatsApp simulada -->
+          <div id="wa-demo-bubble" style="display:none;background:#ECE5DD;border-radius:12px;padding:1.2rem;margin-bottom:1.2rem;text-align:left;">
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.8rem;padding-bottom:0.6rem;border-bottom:1px solid rgba(0,0,0,0.08);">
+              <div style="width:36px;height:36px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">💬</div>
+              <div>
+                <div style="font-weight:700;font-size:0.85rem;color:#1a1a1a;">AgendaPro</div>
+                <div style="font-size:0.72rem;color:#667781;">WhatsApp Business</div>
+              </div>
+            </div>
+            <!-- Typing indicator -->
+            <div id="wa-typing" style="display:flex;align-items:center;gap:4px;padding:0.5rem 0.8rem;background:white;border-radius:8px 8px 8px 2px;width:fit-content;margin-bottom:0.5rem;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+              <span style="width:7px;height:7px;background:#aaa;border-radius:50%;animation:bounce 1s infinite 0s;display:inline-block;"></span>
+              <span style="width:7px;height:7px;background:#aaa;border-radius:50%;animation:bounce 1s infinite 0.2s;display:inline-block;"></span>
+              <span style="width:7px;height:7px;background:#aaa;border-radius:50%;animation:bounce 1s infinite 0.4s;display:inline-block;"></span>
+            </div>
+            <!-- Mensaje real -->
+            <div id="wa-msg" style="display:none;background:white;border-radius:8px 8px 8px 2px;padding:0.8rem 1rem;box-shadow:0 1px 2px rgba(0,0,0,0.1);font-size:0.85rem;line-height:1.6;color:#1a1a1a;max-width:320px;">
+              ✅ <strong>¡Cita Confirmada!</strong><br><br>
+              Hola <span id="wa-nombre-demo"></span>, tu cita ha sido registrada exitosamente en AgendaPro. 🎉<br><br>
+              📅 <strong>Fecha:</strong> <span id="wa-fecha-demo"></span><br>
+              🕐 <strong>Hora:</strong> <span id="wa-hora-demo"></span><br><br>
+              Te enviaremos un recordatorio automático el día anterior.<br><br>
+              <em style="color:#667781;font-size:0.78rem;">— AgendaPro · Sistema de Reservas</em>
+              <div style="text-align:right;font-size:0.7rem;color:#667781;margin-top:0.4rem;">✓✓ Ahora</div>
+            </div>
+          </div>
+
+          <div style="background:rgba(201,150,58,0.08);border:1px solid rgba(201,150,58,0.25);border-radius:6px;padding:0.9rem 1.1rem;margin-bottom:1.2rem;text-align:left;">
+            <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;">✦ Estás viendo una demo de AgendaPro</div>
+            <p style="font-size:0.83rem;color:var(--muted);line-height:1.6;margin:0;">En el sistema real el mensaje de WhatsApp se envía automáticamente al número del paciente. ¿Te interesa implementarlo en tu negocio? <a href="https://gestium-mx.netlify.app/#agendapro" style="color:var(--gold);font-weight:600;text-decoration:none;">Conoce más →</a></p>
+          </div>
           <button class="btn-continue" onclick="resetForm()" style="border:none;cursor:pointer;">Agendar otra cita</button>
           <button class="btn-back" onclick="window.scrollTo({top:0,behavior:'smooth'})">Volver al inicio</button>
         </div>
@@ -339,25 +372,121 @@ footer p{font-size:0.78rem;color:rgba(255,255,255,0.3);}
   </div>
 </div></section>
 <footer><div class="foot-logo">Gestium</div><p>© 2025 Gestium · Sistema de Reservas AgendaPro</p><a href="agendapro-admin.html" class="foot-link">Panel Admin →</a></footer>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://lypusugdltuhniwvgtck.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6TA0vRtKNEgrGHioCFn29Q_SaoiJk_i';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 const today=new Date();
 let calYear=today.getFullYear(),calMonth=today.getMonth(),selDate=null,selTime=null;
+let lastAppt=null;
 function showStep(n){[1,2,3].forEach(i=>{document.getElementById('step'+i).style.display=i===n?'block':'none';const t=document.getElementById('tab'+i);t.className='step-tab'+(i===n?' active':i<n?' done':'');});}
 function goStep1(){showStep(1);}
 function goStep2(){if(!document.getElementById('f-nombre').value.trim()){alert('Por favor ingresa tu nombre.');return;}if(!document.getElementById('f-telefono').value.trim()){alert('Por favor ingresa tu WhatsApp.');return;}showStep(2);renderCalendar();}
-function goStep3(){if(!selDate||!selTime){alert('Por favor selecciona fecha y hora.');return;}saveAppt();showStep(3);renderConfirm();}
+async function goStep3(){if(!selDate||!selTime){alert('Por favor selecciona fecha y hora.');return;}
+  const btn=document.querySelector('#step2 .btn-continue');
+  btn.textContent='Guardando...';btn.disabled=true;
+  await saveAppt();
+  showStep(3);renderConfirm();
+  btn.textContent='› Continuar — Confirmar';btn.disabled=false;
+}
 function updateSummary(){const n=document.getElementById('f-nombre').value;const a=document.getElementById('f-apellido').value;const t=document.getElementById('f-telefono').value;const p=document.getElementById('f-pais').value;setSV('sum-nombre',(n||a)?(n+' '+a).trim():null,'Sin nombre aún');setSV('sum-tel',t?p+' '+t:null,'Sin número');}
 function setSV(id,val,empty){const el=document.getElementById(id);el.textContent=val||empty;el.className=val?'sum-val':'sum-val empty';}
-function renderCalendar(){document.getElementById('cal-month-label').textContent=MONTHS[calMonth]+' '+calYear;const grid=document.getElementById('cal-grid');grid.innerHTML=DAYS.map(d=>`<div class="cal-day-name">${d}</div>`).join('');const first=new Date(calYear,calMonth,1).getDay();const days=new Date(calYear,calMonth+1,0).getDate();for(let i=0;i<first;i++)grid.innerHTML+=`<div class="cal-day empty"></div>`;for(let d=1;d<=days;d++){const dt=new Date(calYear,calMonth,d);const isTod=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();const past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());const isSun=dt.getDay()===0;const isSel=selDate&&dt.toDateString()===selDate.toDateString();let cls='cal-day';if(past||isSun)cls+=' disabled';else if(isTod)cls+=' today';if(isSel)cls+=' selected';grid.innerHTML+=`<div class="${cls}" onclick="pickDate(${d})">${d}</div>`;}renderTimes();}
+
+// ── CALENDARIO ──
+function renderCalendar(){
+  document.getElementById('cal-month-label').textContent=MONTHS[calMonth]+' '+calYear;
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML=DAYS.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  for(let i=0;i<first;i++)grid.innerHTML+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const dt=new Date(calYear,calMonth,d);
+    const isTod=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    const past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    const isSun=dt.getDay()===0;
+    const isSel=selDate&&dt.toDateString()===selDate.toDateString();
+    let cls='cal-day';
+    if(past||isSun)cls+=' disabled';else if(isTod)cls+=' today';
+    if(isSel)cls+=' selected';
+    grid.innerHTML+=`<div class="${cls}" onclick="pickDate(${d})">${d}</div>`;
+  }
+  renderTimes();
+}
 function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}selDate=null;selTime=null;renderCalendar();}
 function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}selDate=null;selTime=null;renderCalendar();}
 function pickDate(d){selDate=new Date(calYear,calMonth,d);selTime=null;setSV('sum-fecha',selDate.toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),'Sin seleccionar');setSV('sum-hora',null,'Sin seleccionar');renderCalendar();}
-function renderTimes(){const grid=document.getElementById('time-grid');if(!selDate){grid.innerHTML='<div style="color:var(--muted);font-size:0.83rem;grid-column:1/-1;padding:0.5rem 0;">Selecciona una fecha para ver horarios</div>';return;}const slots=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];const booked=getBooked(selDate);grid.innerHTML=slots.map(t=>{const blk=booked.includes(t);const sel=t===selTime;return`<div class="time-slot${blk?' blocked':sel?' selected':''}" onclick="${blk?'':'pickTime(\''+t+'\')'}">${t}</div>`;}).join('');}
-function pickTime(t){selTime=t;setSV('sum-hora',t,'Sin seleccionar');renderTimes();}
-function getBooked(date){const appts=JSON.parse(localStorage.getItem('gestium_appts')||'[]');return appts.filter(a=>new Date(a.fecha).toDateString()===date.toDateString()&&a.estado!=='Cancelada').map(a=>a.hora);}
-function saveAppt(){const appts=JSON.parse(localStorage.getItem('gestium_appts')||'[]');const id=crypto.randomUUID();const appt={id,estado:'Pendiente',nombre:document.getElementById('f-nombre').value+' '+document.getElementById('f-apellido').value,whatsapp:document.getElementById('f-pais').value+document.getElementById('f-telefono').value,servicio:'Sin especificar',motivo:document.getElementById('f-motivo').value,fecha:selDate.toISOString(),hora:selTime,creadaEn:new Date().toISOString()};appts.push(appt);localStorage.setItem('gestium_appts',JSON.stringify(appts));sendWA(appt);}
-function sendWA(appt){const nombre=appt.nombre.split(' ')[0];const fechaFmt=new Date(appt.fecha).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});const msg=`✅ ¡Cita Confirmada!\nHola ${nombre}, tu cita en Gestium ha sido registrada.\n📅 Fecha: ${fechaFmt}\n🕐 Hora: ${appt.hora}\n🩺 Servicio: ${appt.servicio}\n🔗 Para cancelar o reagendar entra aquí:\nhttps://gestium.netlify.app/agendapro-reservas.html?cita=${appt.id}\nTe enviaremos un recordatorio el día anterior.`;window.open(`https://wa.me/${appt.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');}
-function renderConfirm(){const appts=JSON.parse(localStorage.getItem('gestium_appts')||'[]');const appt=appts[appts.length-1];const fecha=new Date(appt.fecha).toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('confirm-detail').innerHTML=`<div class="cd-row"><span>👤</span><strong>${appt.nombre}</strong></div><div class="cd-row"><span>🩺</span><span>${appt.servicio}</span></div><div class="cd-row"><span>📅</span><span>${fecha}</span></div><div class="cd-row"><span>🕐</span><span>${appt.hora}</span></div><div class="cd-row"><span>📱</span><span>${appt.whatsapp}</span></div>`;}
-function resetForm(){['f-nombre','f-apellido','f-telefono','f-motivo'].
+
+// ── HORARIOS desde Supabase ──
+let bookedSlots=[];
+async function renderTimes(){
+  const grid=document.getElementById('time-grid');
+  if(!selDate){grid.innerHTML='<div style="color:var(--muted);font-size:0.83rem;grid-column:1/-1;padding:0.5rem 0;">Selecciona una fecha para ver horarios</div>';return;}
+  grid.innerHTML='<div style="color:var(--muted);font-size:0.83rem;grid-column:1/-1;padding:0.5rem 0;">Cargando horarios...</div>';
+  const fechaStr=selDate.toISOString().split('T')[0];
+  const {data}=await sb.from('citas').select('hora').eq('fecha',fechaStr).neq('estado','Cancelada');
+  bookedSlots=(data||[]).map(r=>r.hora.substring(0,5));
+  const slots=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
+  grid.innerHTML=slots.map(t=>{
+    const blk=bookedSlots.includes(t);
+    const sel=t===selTime;
+    return`<div class="time-slot${blk?' blocked':sel?' selected':''}" onclick="${blk?'':'pickTime(\''+t+'\')'}">${t}</div>`;
+  }).join('');
+}
+function pickTime(t){selTime=t;setSV('sum-hora',t,'Sin seleccionar');
+  document.querySelectorAll('.time-slot').forEach(el=>{el.classList.remove('selected');if(el.textContent===t)el.classList.add('selected');});
+}
+
+// ── GUARDAR CITA en Supabase ──
+async function saveAppt(){
+  const nombre=(document.getElementById('f-nombre').value+' '+document.getElementById('f-apellido').value).trim();
+  const whatsapp=document.getElementById('f-pais').value+document.getElementById('f-telefono').value.replace(/\D/g,'');
+  const motivo=document.getElementById('f-motivo').value;
+  const fechaStr=selDate.toISOString().split('T')[0];
+  const {data,error}=await sb.from('citas').insert([{
+    nombre, whatsapp, servicio:'Sin especificar', motivo,
+    fecha:fechaStr, hora:selTime, estado:'Pendiente'
+  }]).select().single();
+  if(error){alert('Error al guardar la cita. Intenta de nuevo.');console.error(error);return;}
+  lastAppt=data;
+  sendWA(data);
+}
+
+// ── SIMULACIÓN WHATSAPP (demo) ──
+function sendWA(appt){
+  // En producción real, aquí se enviaría el mensaje vía API.
+  // Para la demo, solo mostramos la notificación visual.
+}
+
+// ── PANTALLA DE CONFIRMACIÓN ──
+function renderConfirm(){
+  if(!lastAppt)return;
+  const nombre=lastAppt.nombre.split(' ')[0];
+  const fecha=new Date(lastAppt.fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('confirm-detail').innerHTML=`
+    <div class="cd-row"><span>👤</span><strong>${lastAppt.nombre}</strong></div>
+    <div class="cd-row"><span>🩺</span><span>${lastAppt.servicio}</span></div>
+    <div class="cd-row"><span>📅</span><span>${fecha}</span></div>
+    <div class="cd-row"><span>🕐</span><span>${lastAppt.hora}</span></div>
+    <div class="cd-row"><span>📱</span><span>${lastAppt.whatsapp}</span></div>`;
+
+  // Mostrar burbuja de WhatsApp simulada
+  document.getElementById('wa-demo-bubble').style.display='block';
+  document.getElementById('wa-nombre-demo').textContent=nombre;
+  document.getElementById('wa-fecha-demo').textContent=fecha;
+  document.getElementById('wa-hora-demo').textContent=lastAppt.hora;
+
+  // Animación de "escribiendo..." luego aparece el mensaje
+  setTimeout(()=>{
+    document.getElementById('wa-typing').style.display='none';
+    document.getElementById('wa-msg').style.display='block';
+  }, 1800);
+}
+function resetForm(){['f-nombre','f-apellido','f-telefono','f-motivo'].forEach(id=>document.getElementById(id).value='');selDate=null;selTime=null;lastAppt=null;setSV('sum-nombre',null,'Sin nombre aún');setSV('sum-tel',null,'Sin número');setSV('sum-fecha',null,'Sin seleccionar');setSV('sum-hora',null,'Sin seleccionar');showStep(1);}
+</script>
+</body>
+</html>
